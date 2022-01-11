@@ -1,0 +1,148 @@
+---
+title: "Group6_Assignment1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r loadlibraries, message=FALSE, warning=FALSE}
+library(here)
+library(readxl)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(lubridate)
+library(moments)
+
+```
+
+# 1
+
+```{r}
+data <- read_excel(here("Data", "PS1_Monthly.xlsx"))
+glimpse(data)
+
+# Convert date column to date variable
+data$date <- ymd(data$date)
+```
+
+# 2
+
+```{r fig.width=8, fig.height=5.5}
+# Microsoft
+MSFT <- data.frame(date = filter(data, TICKER == "MSFT")$date,
+                   MSFT_RET = filter(data, TICKER == "MSFT")$RET,
+                   MSFT_RETX = filter(data, TICKER == "MSFT")$RETX)
+
+MSFT <- MSFT %>% 
+  mutate(MSFT_VALUE = cumprod(1 + MSFT_RET),
+         MSFT_VALUEX = cumprod(1 + MSFT_RETX))
+
+paste0("Total Return of Microsoft reinvesting dividends: ", paste0(round(MSFT[nrow(MSFT),"MSFT_VALUE"], 4)*100, "%"))
+paste0("Total Return of Microsoft without reinvesting dividends: ", paste0(round(MSFT[nrow(MSFT),"MSFT_VALUEX"], 4)*100, "%"))
+
+ggplot(data = MSFT, aes(x = date)) +
+  geom_line(aes(y = MSFT_VALUE, color = "withDividends")) +
+  geom_line(aes(y = MSFT_VALUEX, color = "withoutDividends")) +
+  scale_colour_manual("", 
+                      breaks = c("withDividends", "withoutDividends"),
+                      values = c("tomato3", "royalblue2")) +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  labs(title = "Return of Microsoft Stock from 1990 to 2015",
+       x = "",
+       y = "Value")
+```
+
+```{r fig.width=8, fig.height=5.5}
+# General Electric
+GE <- data.frame(date = filter(data, TICKER == "GE")$date,
+                 GE_RET = filter(data, TICKER == "GE")$RET,
+                 GE_RETX = filter(data, TICKER == "GE")$RETX)
+
+GE <- GE %>% 
+  mutate(GE_VALUE = cumprod(1 + GE_RET),
+         GE_VALUEX = cumprod(1 + GE_RETX))
+
+paste0("Total Return of Microsoft reinvesting dividends: ", paste0(round(GE[nrow(GE),"GE_VALUE"], 4)*100, "%"))
+paste0("Total Return of Microsoft without reinvesting dividends: ", paste0(round(GE[nrow(GE),"GE_VALUEX"], 4)*100, "%"))
+
+ggplot(data = GE, aes(x = date)) +
+  geom_line(aes(y = GE_VALUE, color = "withDividends")) +
+  geom_line(aes(y = GE_VALUEX, color = "withoutDividends")) +
+  scale_colour_manual("", 
+                      breaks = c("withDividends", "withoutDividends"),
+                      values = c("tomato3", "royalblue2")) +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  labs(title = "Return of General Electric Stock from 1990 to 2015",
+       x = "",
+       y = "Value")
+```
+
+```{r fig.width=8, fig.height=5.5}
+# S&P 500
+SP500 <- data.frame(date = filter(data, TICKER == "MSFT")$date,
+                    SP500_RET = filter(data, TICKER == "MSFT")$sprtrn)
+
+SP500 <- SP500 %>% mutate(SP500_VALUE = cumprod(1 + SP500_RET))
+
+paste0("Total Return of S&P 500: ", paste0(round(SP500[nrow(SP500),"SP500_VALUE"], 4)*100, "%"))
+
+ggplot(data = SP500, aes(x = date)) +
+  geom_line(aes(y = SP500_VALUE)) +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  labs(title = "Return of S&P 500 Index from 1990 to 2015",
+       x = "",
+       y = "Value")
+```
+
+# 3
+
+```{r}
+# Get Log return
+MSFT$MSFT_LRET <- log(MSFT$MSFT_VALUE/lag(MSFT$MSFT_VALUE))
+MSFT <- na.omit(MSFT)
+```
+
+```{r}
+# Mean, Variance, Skewness, Kurtosis of Normal Returns
+paste0("Mean of Normal Monthly Returns: ", round(mean(MSFT$MSFT_RET)*100, 2), "%")
+paste0("Variance of Normal Monthly Returns: ", round(var(MSFT$MSFT_RET)*100, 2), "%")
+paste0("Skewness of Normal Monthly Returns: ", round(skewness(MSFT$MSFT_RET), 2))
+paste0("Kurtosis of Normal Monthly Returns: ", round(kurtosis(MSFT$MSFT_RET), 2))
+```
+
+```{r}
+# Mean, Variance, Skewness, Kurtosis of Log Returns
+paste0("Mean of Log Monthly Returns: ", round(mean(MSFT$MSFT_LRET)*100, 2), "%")
+paste0("Variance of Log Monthly Returns: ", round(var(MSFT$MSFT_LRET)*100, 2), "%")
+paste0("Skewness of Log Monthly Returns: ", round(skewness(MSFT$MSFT_LRET), 2))
+paste0("Kurtosis of Log Monthly Returns: ", round(kurtosis(MSFT$MSFT_LRET), 2))
+```
+
+```{r fig.height=7, fig.width=8}
+# Plot
+MSFT %>% 
+  select(`Normal Return` = MSFT_RET, `Log Return` = MSFT_LRET) %>% 
+  pivot_longer(everything(), names_to = "Type", values_to = "Return") %>% 
+  mutate(Type = factor(Type, levels = c("Normal Return", "Log Return"))) %>% 
+  ggplot(aes(x = Return, fill = Type)) +
+    geom_histogram(bins = 80) +
+    facet_grid(rows = vars(Type)) +
+    theme_bw() +
+    theme(legend.position = "none") +
+    labs(title = "Monthly Returns of MSFT from 1990 - 2015",
+         x = "",
+         y = "")
+```
+
+# 4
+
+```{r}
+
+```
+
