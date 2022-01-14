@@ -21,20 +21,20 @@ library(moments)
 # 1
 
 ```{r}
-data <- read_excel(here("Data", "PS1_Monthly.xlsx"))
-glimpse(data)
+monthly_data <- read_excel(here("Data", "PS1_Monthly.xlsx"))
+glimpse(monthly_data)
 
 # Convert date column to date variable
-data$date <- ymd(data$date)
+monthly_data$date <- ymd(monthly_data$date)
 ```
 
 # 2
 
-```{r fig.width=8, fig.height=5.5}
+```{r fig.width=7, fig.height=5}
 # Microsoft
-MSFT <- data.frame(date = filter(data, TICKER == "MSFT")$date,
-                   MSFT_RET = filter(data, TICKER == "MSFT")$RET,
-                   MSFT_RETX = filter(data, TICKER == "MSFT")$RETX)
+MSFT <- data.frame(date = filter(monthly_data, TICKER == "MSFT")$date,
+                   MSFT_RET = filter(monthly_data, TICKER == "MSFT")$RET,
+                   MSFT_RETX = filter(monthly_data, TICKER == "MSFT")$RETX)
 
 MSFT <- MSFT %>% 
   mutate(MSFT_VALUE = cumprod(1 + MSFT_RET),
@@ -51,16 +51,16 @@ ggplot(data = MSFT, aes(x = date)) +
                       values = c("tomato3", "royalblue2")) +
   theme_minimal() +
   theme(legend.position = "bottom") +
-  labs(title = "Return of Microsoft Stock from 1990 to 2015",
+  labs(title = "Monthly Total Return of Microsoft Stock from 1990 to 2015",
        x = "",
        y = "Value")
 ```
 
-```{r fig.width=8, fig.height=5.5}
+```{r fig.width=7, fig.height=5}
 # General Electric
-GE <- data.frame(date = filter(data, TICKER == "GE")$date,
-                 GE_RET = filter(data, TICKER == "GE")$RET,
-                 GE_RETX = filter(data, TICKER == "GE")$RETX)
+GE <- data.frame(date = filter(monthly_data, TICKER == "GE")$date,
+                 GE_RET = filter(monthly_data, TICKER == "GE")$RET,
+                 GE_RETX = filter(monthly_data, TICKER == "GE")$RETX)
 
 GE <- GE %>% 
   mutate(GE_VALUE = cumprod(1 + GE_RET),
@@ -77,15 +77,15 @@ ggplot(data = GE, aes(x = date)) +
                       values = c("tomato3", "royalblue2")) +
   theme_minimal() +
   theme(legend.position = "bottom") +
-  labs(title = "Return of General Electric Stock from 1990 to 2015",
+  labs(title = "Monthly Total Return of General Electric Stock from 1990 to 2015",
        x = "",
        y = "Value")
 ```
 
-```{r fig.width=8, fig.height=5.5}
+```{r fig.width=7, fig.height=5}
 # S&P 500
-SP500 <- data.frame(date = filter(data, TICKER == "MSFT")$date,
-                    SP500_RET = filter(data, TICKER == "MSFT")$sprtrn)
+SP500 <- data.frame(date = filter(monthly_data, TICKER == "MSFT")$date,
+                    SP500_RET = filter(monthly_data, TICKER == "MSFT")$sprtrn)
 
 SP500 <- SP500 %>% mutate(SP500_VALUE = cumprod(1 + SP500_RET))
 
@@ -95,7 +95,7 @@ ggplot(data = SP500, aes(x = date)) +
   geom_line(aes(y = SP500_VALUE)) +
   theme_minimal() +
   theme(legend.position = "bottom") +
-  labs(title = "Return of S&P 500 Index from 1990 to 2015",
+  labs(title = "Monthly Total Return of S&P 500 Index from 1990 to 2015",
        x = "",
        y = "Value")
 ```
@@ -104,24 +104,56 @@ ggplot(data = SP500, aes(x = date)) +
 
 ```{r}
 # Get Log return
-MSFT$MSFT_LRET <- log(MSFT$MSFT_VALUE/lag(MSFT$MSFT_VALUE))
-MSFT <- na.omit(MSFT)
+MSFT$MSFT_LRET <- log(1 + MSFT$MSFT_RET)
+
+GE$GE_LRET <- log(1 + GE$GE_RET)
+
+SP500$SP500_LRET <- log(1 + SP500$SP500_RET)
 ```
 
-```{r}
+```{r collapse=TRUE}
+# MSFT
 # Mean, Variance, Skewness, Kurtosis of Normal Returns
-paste0("Mean of Normal Monthly Returns: ", round(mean(MSFT$MSFT_RET)*100, 2), "%")
-paste0("Variance of Normal Monthly Returns: ", round(var(MSFT$MSFT_RET)*100, 2), "%")
-paste0("Skewness of Normal Monthly Returns: ", round(skewness(MSFT$MSFT_RET), 2))
-paste0("Kurtosis of Normal Monthly Returns: ", round(kurtosis(MSFT$MSFT_RET), 2))
+paste0("Mean of MSFT Normal Monthly Returns: ", round(mean(MSFT$MSFT_RET)*100, 2), "%")
+paste0("Variance of MSFT Normal Monthly Returns: ", round(var(MSFT$MSFT_RET)*100, 2), "%")
+paste0("Skewness of MSFT Normal Monthly Returns: ", round(skewness(MSFT$MSFT_RET), 2))
+paste0("Kurtosis of MSFT Normal Monthly Returns: ", round(kurtosis(MSFT$MSFT_RET), 2))
+
+# Mean, Variance, Skewness, Kurtosis of Log Returns
+paste0("Mean of MSFT Log Monthly Returns: ", round(mean(MSFT$MSFT_LRET)*100, 2), "%")
+paste0("Variance of MSFT Log Monthly Returns: ", round(var(MSFT$MSFT_LRET)*100, 2), "%")
+paste0("Skewness of MSFT Log Monthly Returns: ", round(skewness(MSFT$MSFT_LRET), 2))
+paste0("Kurtosis of MSFT Log Monthly Returns: ", round(kurtosis(MSFT$MSFT_LRET), 2))
 ```
 
-```{r}
+```{r collapse=TRUE}
+# GE
+# Mean, Variance, Skewness, Kurtosis of Normal Returns
+paste0("Mean of GE Normal Monthly Returns: ", round(mean(GE$GE_RET)*100, 2), "%")
+paste0("Variance of GE Normal Monthly Returns: ", round(var(GE$GE_RET)*100, 2), "%")
+paste0("Skewness of GE Normal Monthly Returns: ", round(skewness(GE$GE_RET), 2))
+paste0("Kurtosis of GE Normal Monthly Returns: ", round(kurtosis(GE$GE_RET), 2))
+
 # Mean, Variance, Skewness, Kurtosis of Log Returns
-paste0("Mean of Log Monthly Returns: ", round(mean(MSFT$MSFT_LRET)*100, 2), "%")
-paste0("Variance of Log Monthly Returns: ", round(var(MSFT$MSFT_LRET)*100, 2), "%")
-paste0("Skewness of Log Monthly Returns: ", round(skewness(MSFT$MSFT_LRET), 2))
-paste0("Kurtosis of Log Monthly Returns: ", round(kurtosis(MSFT$MSFT_LRET), 2))
+paste0("Mean of GE Log Monthly Returns: ", round(mean(GE$GE_LRET)*100, 2), "%")
+paste0("Variance of GE Log Monthly Returns: ", round(var(GE$GE_LRET)*100, 2), "%")
+paste0("Skewness of GE Log Monthly Returns: ", round(skewness(GE$GE_LRET), 2))
+paste0("Kurtosis of GE Log Monthly Returns: ", round(kurtosis(GE$GE_LRET), 2))
+```
+
+```{r collapse=TRUE}
+# S&P500
+# Mean, Variance, Skewness, Kurtosis of Normal Returns
+paste0("Mean of SP500 Normal Monthly Returns: ", round(mean(SP500$SP500_RET)*100, 2), "%")
+paste0("Variance of SP500 Normal Monthly Returns: ", round(var(SP500$SP500_RET)*100, 2), "%")
+paste0("Skewness of SP500 Normal Monthly Returns: ", round(skewness(SP500$SP500_RET), 2))
+paste0("Kurtosis of SP500 Normal Monthly Returns: ", round(kurtosis(SP500$SP500_RET), 2))
+
+# Mean, Variance, Skewness, Kurtosis of Log Returns
+paste0("Mean of SP500 Log Monthly Returns: ", round(mean(SP500$SP500_LRET)*100, 2), "%")
+paste0("Variance of SP500 Log Monthly Returns: ", round(var(SP500$SP500_LRET)*100, 2), "%")
+paste0("Skewness of SP500 Log Monthly Returns: ", round(skewness(SP500$SP500_LRET), 2))
+paste0("Kurtosis of SP500 Log Monthly Returns: ", round(kurtosis(SP500$SP500_LRET), 2))
 ```
 
 ```{r fig.height=7, fig.width=8}
@@ -142,7 +174,237 @@ MSFT %>%
 
 # 4
 
-```{r}
+```{r message=FALSE, warning=FALSE}
+daily_ret_data <- read_excel(here("Data", "PS1_Daily.xlsx"), sheet = "HPR_daily")
+colnames(daily_ret_data) <- paste0(daily_ret_data[1,], "_RET")
+daily_ret_data <- daily_ret_data[-1,]
 
+daily_price_data <- read_excel(here("Data", "PS1_Daily.xlsx"), sheet = "Prices_daily")
+colnames(daily_price_data) <- paste0(daily_price_data[1,], "_PRICE")
+daily_price_data <- daily_price_data[-1,]
+
+daily_data <- daily_ret_data %>%
+  rename(date = DATE_RET) %>% 
+  left_join(daily_price_data %>% rename(date = DATE_PRICE), by = "date")
+
+rm(daily_ret_data, daily_price_data)
+
+glimpse(daily_data)
+
+# Convert date column to date variable
+daily_data$date <- ymd(daily_data$date)
+
+# Convert all other columns to numeric 
+daily_data <- daily_data %>% mutate_if(is.character, as.numeric)
+```
+
+#5
+
+```{r fig.width=7, fig.height=5}
+MSFT_GE_SP500 <- daily_data %>% 
+  select(date, MSFT_RET, GE_RET, SPRTRN_RET) %>% 
+  mutate(MSFT_VALUE = cumprod(1 + MSFT_RET),
+         GE_VALUE = cumprod(1 + GE_RET),
+         SPRTRN_VALUE = cumprod(1 + SPRTRN_RET))
+
+ggplot(data = MSFT_GE_SP500, aes(x = date)) +
+  geom_line(aes(y = MSFT_VALUE, color = "MSFT")) +
+  geom_line(aes(y = GE_VALUE, color = "GE")) +
+  geom_line(aes(y = SPRTRN_VALUE, color = "S&P500")) +
+  scale_colour_manual("", 
+                      breaks = c("MSFT", "GE", "S&P500"),
+                      values = c("tomato3", "royalblue2", "black")) +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  labs(title = "Daily Total Return of MSFT, GE and S&P500 from 1990 to 2015",
+      x = "",
+      y = "Value")
+
+
+```
+
+Comparing with indices from above, it is the same as the total return indices with dividends reinvested.
+
+# 6
+
+```{r}
+# Get Log return
+MSFT_GE_SP500$MSFT_LRET <- log(1 + MSFT_GE_SP500$MSFT_RET)
+MSFT_GE_SP500$GE_LRET <- log(1 + MSFT_GE_SP500$GE_RET)
+MSFT_GE_SP500$SPRTRN_LRET <- log(1 + MSFT_GE_SP500$SPRTRN_RET)
+```
+
+```{r collapse=TRUE}
+# MSFT
+# Mean, Variance, Skewness, Kurtosis of Normal Returns
+paste0("Mean of MSFT Normal Daily Returns: ", round(mean(MSFT_GE_SP500$MSFT_RET)*100, 2), "%")
+paste0("Variance of MSFT Normal Daily Returns: ", round(var(MSFT_GE_SP500$MSFT_RET)*100, 2), "%")
+paste0("Skewness of MSFT Normal Daily Returns: ", round(skewness(MSFT_GE_SP500$MSFT_RET), 2))
+paste0("Kurtosis of MSFT Normal Daily Returns: ", round(kurtosis(MSFT_GE_SP500$MSFT_RET), 2))
+
+# Mean, Variance, Skewness, Kurtosis of Log Returns
+paste0("Mean of MSFT Log Daily Returns: ", round(mean(MSFT_GE_SP500$MSFT_LRET)*100, 2), "%")
+paste0("Variance of MSFT Log Daily Returns: ", round(var(MSFT_GE_SP500$MSFT_LRET)*100, 2), "%")
+paste0("Skewness of MSFT Log Daily Returns: ", round(skewness(MSFT_GE_SP500$MSFT_LRET), 2))
+paste0("Kurtosis of MSFT Log Daily Returns: ", round(kurtosis(MSFT_GE_SP500$MSFT_LRET), 2))
+```
+
+```{r collapse=TRUE}
+# GE
+# Mean, Variance, Skewness, Kurtosis of Normal Returns
+paste0("Mean of GE Normal Daily Returns: ", round(mean(MSFT_GE_SP500$GE_RET)*100, 2), "%")
+paste0("Variance of GE Normal Daily Returns: ", round(var(MSFT_GE_SP500$GE_RET)*100, 2), "%")
+paste0("Skewness of GE Normal Daily Returns: ", round(skewness(MSFT_GE_SP500$GE_RET), 2))
+paste0("Kurtosis of GE Normal Daily Returns: ", round(kurtosis(MSFT_GE_SP500$GE_RET), 2))
+
+# Mean, Variance, Skewness, Kurtosis of Log Returns
+paste0("Mean of GE Log Daily Returns: ", round(mean(MSFT_GE_SP500$GE_LRET)*100, 2), "%")
+paste0("Variance of GE Log Daily Returns: ", round(var(MSFT_GE_SP500$GE_LRET)*100, 2), "%")
+paste0("Skewness of GE Log Daily Returns: ", round(skewness(MSFT_GE_SP500$GE_LRET), 2))
+paste0("Kurtosis of GE Log Daily Returns: ", round(kurtosis(MSFT_GE_SP500$GE_LRET), 2))
+```
+
+```{r collapse=TRUE}
+# S&P500
+# Mean, Variance, Skewness, Kurtosis of Normal Returns
+paste0("Mean of SP500 Normal Daily Returns: ", round(mean(MSFT_GE_SP500$SPRTRN_RET)*100, 2), "%")
+paste0("Variance of SP500 Normal Daily Returns: ", round(var(MSFT_GE_SP500$SPRTRN_RET)*100, 2), "%")
+paste0("Skewness of SP500 Normal Daily Returns: ", round(skewness(MSFT_GE_SP500$SPRTRN_RET), 2))
+paste0("Kurtosis of SP500 Normal Daily Returns: ", round(kurtosis(MSFT_GE_SP500$SPRTRN_RET), 2))
+
+# Mean, Variance, Skewness, Kurtosis of Log Returns
+paste0("Mean of SP500 Log Daily Returns: ", round(mean(MSFT_GE_SP500$SPRTRN_LRET)*100, 2), "%")
+paste0("Variance of SP500 Log Daily Returns: ", round(var(MSFT_GE_SP500$SPRTRN_LRET)*100, 2), "%")
+paste0("Skewness of SP500 Log Daily Returns: ", round(skewness(MSFT_GE_SP500$SPRTRN_LRET), 2))
+paste0("Kurtosis of SP500 Log Daily Returns: ", round(kurtosis(MSFT_GE_SP500$SPRTRN_LRET), 2))
+```
+
+# 7
+
+MSFT
+
+```{r collapse=TRUE}
+# Mean, Variance, Skewness, Kurtosis of Monthly Log Returns
+paste0("Mean of MSFT Log Monthly Returns: ", round(mean(MSFT$MSFT_LRET)*100, 2), "%")
+paste0("Variance of MSFT Log Monthly Returns: ", round(var(MSFT$MSFT_LRET)*100, 2), "%")
+paste0("Skewness of MSFT Log Monthly Returns: ", round(skewness(MSFT$MSFT_LRET), 2))
+paste0("Kurtosis of MSFT Log Monthly Returns: ", round(kurtosis(MSFT$MSFT_LRET), 2))
+
+# Mean, Variance, Skewness, Kurtosis of Daily Log Returns
+paste0("Mean of MSFT Log Daily Returns: ", round(mean(MSFT_GE_SP500$MSFT_LRET)*100, 2), "%")
+paste0("Variance of MSFT Log Daily Returns: ", round(var(MSFT_GE_SP500$MSFT_LRET)*100, 2), "%")
+paste0("Skewness of MSFT Log Daily Returns: ", round(skewness(MSFT_GE_SP500$MSFT_LRET), 2))
+paste0("Kurtosis of MSFT Log Daily Returns: ", round(kurtosis(MSFT_GE_SP500$MSFT_LRET), 2))
+```
+
+GE
+
+```{r collapse=TRUE}
+# Mean, Variance, Skewness, Kurtosis of Monthly Log Returns
+paste0("Mean of GE Log Monthly Returns: ", round(mean(GE$GE_LRET)*100, 2), "%")
+paste0("Variance of GE Log Monthly Returns: ", round(var(GE$GE_LRET)*100, 2), "%")
+paste0("Skewness of GE Log Monthly Returns: ", round(skewness(GE$GE_LRET), 2))
+paste0("Kurtosis of GE Log Monthly Returns: ", round(kurtosis(GE$GE_LRET), 2))
+
+# Mean, Variance, Skewness, Kurtosis of Daily Log Returns
+paste0("Mean of GE Log Daily Returns: ", round(mean(MSFT_GE_SP500$GE_LRET)*100, 2), "%")
+paste0("Variance of GE Log Daily Returns: ", round(var(MSFT_GE_SP500$GE_LRET)*100, 2), "%")
+paste0("Skewness of GE Log Daily Returns: ", round(skewness(MSFT_GE_SP500$GE_LRET), 2))
+paste0("Kurtosis of GE Log Daily Returns: ", round(kurtosis(MSFT_GE_SP500$GE_LRET), 2))
+```
+
+S&P 500
+
+```{r collapse=TRUE}
+# Mean, Variance, Skewness, Kurtosis of Monthly Log Returns
+paste0("Mean of SP500 Log Monthly Returns: ", round(mean(SP500$SP500_LRET)*100, 2), "%")
+paste0("Variance of SP500 Log Monthly Returns: ", round(var(SP500$SP500_LRET)*100, 2), "%")
+paste0("Skewness of SP500 Log Monthly Returns: ", round(skewness(SP500$SP500_LRET), 2))
+paste0("Kurtosis of SP500 Log Monthly Returns: ", round(kurtosis(SP500$SP500_LRET), 2))
+
+# Mean, Variance, Skewness, Kurtosis of Daily Log Returns
+paste0("Mean of SP500 Log Daily Returns: ", round(mean(MSFT_GE_SP500$SPRTRN_LRET)*100, 2), "%")
+paste0("Variance of SP500 Log Daily Returns: ", round(var(MSFT_GE_SP500$SPRTRN_LRET)*100, 2), "%")
+paste0("Skewness of SP500 Log Daily Returns: ", round(skewness(MSFT_GE_SP500$SPRTRN_LRET), 2))
+paste0("Kurtosis of SP500 Log Daily Returns: ", round(kurtosis(MSFT_GE_SP500$SPRTRN_LRET), 2))
+```
+
+# 8
+
+```{r}
+tickers <- c("MSFT", "XOM", "GE", "JPM", "INTC", "C")
+set.seed(1234)
+sample_tickers = sample(tickers, 3)
+
+selection <- daily_data %>% 
+  select(date, starts_with(sample_tickers) & ends_with("RET"), SPRTRN_RET)
+
+selection_LRET <- as.data.frame(apply(selection %>% select(ends_with("RET")) + 1, MARGIN = 2, FUN = log))
+colnames(selection_LRET) <- c(paste0(sample_tickers, "_LRET"), "SPRTRN_LRET")
+selection_VALUE <- as.data.frame(apply(selection %>% select(ends_with("RET")) + 1, MARGIN = 2, FUN = cumprod))
+colnames(selection_VALUE) <- c(paste0(sample_tickers, "_VALUE"), "SPRTRN_VALUE")
+
+selection <- selection %>% 
+  cbind(selection_LRET) %>% 
+  cbind(selection_VALUE)
+
+rm(selection_LRET, tickers)
+```
+
+# 9
+
+```{r}
+# Log returns
+cor(selection %>% select(ends_with("LRET")))
+
+# Log returns squared
+cor((selection %>% select(ends_with("LRET")))^2)
+```
+
+# 10
+
+```{r}
+for (ticker in c(sample_tickers, "SPRTRN")) {
+  acf(selection %>% select(starts_with(ticker) & ends_with("LRET")), lag.max = 30, main = paste0(ticker, " Log Return"))
+  acf((selection %>% select(starts_with(ticker) & ends_with("LRET")))^2, lag.max = 30, main = paste0(ticker, " Squared Log Return"))
+  acf(abs(selection %>% select(starts_with(ticker) & ends_with("LRET"))), lag.max = 30, main = paste0(ticker, " Absolute Log Return"))
+}
+```
+
+# 11
+
+```{r}
+arbitrary_weights <- c(1/3, 1/3, 1/3)
+
+portfolio <- selection %>% 
+  select(date, starts_with(sample_tickers) & ends_with("RET") & !ends_with("LRET"))
+```
+
+# 12
+
+```{r}
+# Portfolio return
+portfolio$Portfolio_RET <- as(portfolio %>% select(starts_with(sample_tickers)), "matrix") %*% arbitrary_weights
+
+# Portfolio total return index
+portfolio$Portfolio_VALUE <- cumprod(1 + portfolio$Portfolio_RET)
+
+# Single stock total return index
+portfolio <- cbind(portfolio, selection_VALUE %>% select(starts_with(sample_tickers)))
+
+# Plotting
+ggplot(portfolio, aes(x = date)) +
+  geom_line(aes(y = Portfolio_VALUE, color = "Portfolio")) +
+  geom_line(aes(y = JPM_VALUE, color = "JPMorgan")) +
+  geom_line(aes(y = XOM_VALUE, color = "ExxonMobil")) +
+  geom_line(aes(y = INTC_VALUE, color = "Intel")) +
+  scale_colour_manual("", 
+                      breaks = c("Portfolio", "JPMorgan", "ExxonMobil", "Intel"),
+                      values = c("tomato4", "lightyellow2", "palegreen1", "lightblue2")) +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  labs(title = "Daily Total Return of Individual Stocks and Portfolio from 1990 to 2015",
+       x = "",
+       y = "Value")
 ```
 
