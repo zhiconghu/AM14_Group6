@@ -181,15 +181,50 @@ MSFT %>%
   pivot_longer(everything(), names_to = "Type", values_to = "Return") %>% 
   mutate(Type = factor(Type, levels = c("Normal Return", "Log Return"))) %>% 
   ggplot(aes(x = Return, fill = Type)) +
-    geom_histogram(bins = 80) +
-    facet_grid(rows = vars(Type)) +
+    geom_histogram(bins = 30, alpha = 0.9) +
     theme_bw() +
-    theme(legend.position = "none") +
+    theme(legend.position = "bottom") +
     labs(title = "Monthly Returns of MSFT from 1990 - 2015",
          x = "",
          y = "")
 
+
 ```
+
+```{r plotting the lograthmic return for general electric, fig.height=7, fig.width=8}
+
+GE %>% 
+  select(`Normal Return` = GE_RET, `Log Return` = GE_LRET) %>% 
+  pivot_longer(everything(), names_to = "Type", values_to = "Return") %>% 
+  mutate(Type = factor(Type, levels = c("Normal Return", "Log Return"))) %>% 
+  ggplot(aes(x = Return, fill = Type)) +
+    geom_histogram(bins = 30, alpha = 0.9) +
+    theme_bw() +
+    theme(legend.position = "bottom") +
+    labs(title = "Monthly Returns of GE from 1990 - 2015",
+         x = "",
+         y = "")
+
+
+```
+
+```{r plotting the lograthmic return for S&P500, fig.height=7, fig.width=8}
+
+SP500 %>% 
+  select(`Normal Return` = SP500_RET, `Log Return` = SP500_LRET) %>% 
+  pivot_longer(everything(), names_to = "Type", values_to = "Return") %>% 
+  mutate(Type = factor(Type, levels = c("Normal Return", "Log Return"))) %>% 
+  ggplot(aes(x = Return, fill = Type)) +
+    geom_histogram(bins = 30, alpha = 0.9) +
+    theme_bw() +
+    theme(legend.position = "bottom") +
+    labs(title = "Monthly Returns of S&P500 from 1990 - 2015",
+         x = "",
+         y = "")
+
+
+```
+
 
 # 4
 
