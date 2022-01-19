@@ -427,6 +427,8 @@ rm(selection_LRET, tickers)
 
 ```
 
+> In this section, three random stocks are selected, in this case JP Morgan, Exxon Mobile and Intel, and a data frame is created with the normal and log returns of the holding period and the total return indices for these three stocks and the S&P500. This allows us to compare stock returns directly and calculate the covariance between them in the following question.
+
 ## Q9
 
 ```{r covariance matrix, warning=FALSE, message=FALSE}
@@ -438,6 +440,20 @@ cor(selection %>%
 cor((selection %>% select(ends_with("LRET")))^2)
 
 ```
+
+> The covariance allows us to measure the directional measure between two stock returns, meaning how stocks may perform relative to each other. More specifically, covariance is calculated using the formula:
+>
+> $$
+> \sigma_i,_j = \frac{1}{N-1}\sum_{i = 1}^{N}{(r_i - \bar{r_i})(r_j - \bar{r_j})}
+> $$
+>
+> Where $\sigma$ is the covariance, $N$ the sample size, $r$ the return and $\bar{r}$ the average return for stocks $i$ and $j$. In this case, we evaluate and compare logarithmic returns of JPM, XOM, INTC and the S&P500.
+>
+> Looking at the 1st covariance table (using normal log returns), we immediately observe that all covariance values are positive, meaning that all stocks tend to move together; ie. if XOM has a positive return, JPM will tend to have a positive return as well and viceversa. We can also see that highest covariance (>0.6) comes when including the S&P in the comparison. This is logical as the S&P provides a broad indication of the market performance each day, and the stocks being analysed contribute to the S&P500 performance as they are part of the index. Lastly, covariance between JPM, XOM and INTC is in all cases around 0.3, with the lowest covariance being between XOM and INTC (\~0.275) and the highest between JPM and INTC (\~0.383).
+>
+> Using squared log returns, we can obtain a proxy of daily volatility. Using these and calculating the covariance matrix for all our stocks, we observe whether high daily volatility of one stock can indicate high daily volatility for another. From the matrix obtained, we once again observe highest covariance when stocks are compared to the S&P (0.71 for XOM, 0.54 for JPM and 0.30 for INTC) and a covariance of around \~0.18 when comparing XOM, JPM and INTC between one another. Overall, covariance values are lower than the ones using normal returns, meaning that daily volatility for one stock is less of a valuable indicator of the volatility of another stock.
+>
+> Using this information, when building a portfolio, we may want to select stocks with low covariance between each other, obtaining stocks that move opposite to each other and hence diversifying and reducing risk while obtaining the same expected return.
 
 ## Q10
 
