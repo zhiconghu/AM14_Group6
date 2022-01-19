@@ -7,7 +7,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r loadlibraries, message=FALSE, warning=FALSE}
+```{r loadlibraries, include = FALSE , message=FALSE, warning=FALSE}
 library(here)
 library(readxl)
 library(dplyr)
@@ -18,7 +18,11 @@ library(moments)
 
 ```
 
-# 1
+# Assignment 1: Prices, Returns and Portfolios
+
+## AM14 Empirical Finance - Study Group 6
+
+## Q1
 
 ```{r loading datasets, warning=FALSE, message=FALSE}
 # loading PS1 Monthly data
@@ -31,7 +35,7 @@ glimpse(monthly_data)
 monthly_data$date <- ymd(monthly_data$date)
 ```
 
-# 2
+## Q2
 
 ```{r Microsoft Total return, fig.width=7, fig.height=5,warning= FALSE, message=FALSE }
 
@@ -111,7 +115,7 @@ ggplot(data = SP500, aes(x = date)) +
        y = "Value")
 ```
 
-# 3
+## Q3
 
 ```{r logarthmic returns, warning=FALSE, message=FALSE}
 
@@ -225,8 +229,7 @@ SP500 %>%
 
 ```
 
-
-# 4
+## Q4
 
 ```{r PS1 daily, message=FALSE, warning=FALSE}
 # loading HPR Daily Sheet   
@@ -257,7 +260,7 @@ daily_data$date <- ymd(daily_data$date)
 daily_data <- daily_data %>% mutate_if(is.character, as.numeric)
 ```
 
-# 5
+## Q5
 
 ```{r daily total return, fig.width=7, fig.height=5}
 
@@ -286,7 +289,7 @@ ggplot(data = MSFT_GE_SP500, aes(x = date)) +
 
 Comparing with indices from above, it is the same as the total return indices with dividends reinvested.
 
-# 6
+## Q6
 
 ```{r logarthmic daily returns}
 # Log return of Microsoft
@@ -343,7 +346,7 @@ paste0("Skewness of SP500 Log Daily Returns: ", round(skewness(MSFT_GE_SP500$SPR
 paste0("Kurtosis of SP500 Log Daily Returns: ", round(kurtosis(MSFT_GE_SP500$SPRTRN_LRET), 2))
 ```
 
-# 7
+## Q7
 
 MSFT
 
@@ -393,7 +396,7 @@ paste0("Skewness of SP500 Log Daily Returns: ", round(skewness(MSFT_GE_SP500$SPR
 paste0("Kurtosis of SP500 Log Daily Returns: ", round(kurtosis(MSFT_GE_SP500$SPRTRN_LRET), 2))
 ```
 
-# 8
+## Q8
 
 ```{r selection of three stocks, warning=FALSE, message=FALSE}
 tickers <- c("MSFT", "XOM", "GE", "JPM", "INTC", "C")
@@ -424,7 +427,7 @@ rm(selection_LRET, tickers)
 
 ```
 
-# 9
+## Q9
 
 ```{r covariance matrix, warning=FALSE, message=FALSE}
 # Covariance matrix for Log returns
@@ -436,7 +439,7 @@ cor((selection %>% select(ends_with("LRET")))^2)
 
 ```
 
-# 10
+## Q10
 
 ```{r plot ACF, warning=FALSE, message=FALSE}
 for (ticker in c(sample_tickers, "SPRTRN")) {
@@ -447,7 +450,7 @@ for (ticker in c(sample_tickers, "SPRTRN")) {
 
 ```
 
-# 11
+## Q11
 
 ```{r creating a portfolio, warning=FALSE, message=FALSE}
 # assigning portfolio weights
@@ -458,9 +461,9 @@ portfolio <- selection %>%
   select(date, starts_with(sample_tickers) & ends_with("RET") & !ends_with("LRET"))
 ```
 
->> We have arbitrarly assigned the equal weights to the chosen three stocks. However, if we keep the weights fixed over time then we will be unable to benefit that much from the diversification of the assests in the portfolio. The purpose of the assigning weights is to safeguards the investors from undesirable risks. A stock's performance can vary over time, thus the percentage of the funds associated with the stocks will require a change with a change in the market conditions. Changing weights of the assets in the portfolio gives investors the opportunity to sell high and buy low, taking the gains from high-performing investments.
+> We have arbitrarily assigned the equal weights to the chosen three stocks. However, if we keep the weights fixed over time then we will be unable to benefit that much from the diversification of the assets in the portfolio. The purpose of the assigning weights is to safeguards the investors from undesirable risks. A stock's performance can vary over time, thus the percentage of the funds associated with the stocks will require a change with a change in the market conditions. Changing weights of the assets in the portfolio gives investors the opportunity to sell high and buy low, taking the gains from high-performing investments.
 
-# 12
+## Q12
 
 ```{r portfolio returns, warning=FALSE, message=FALSE}
 # Portfolio return
@@ -489,4 +492,4 @@ ggplot(portfolio, aes(x = date)) +
        y = "Value")
 ```
 
->> By spreading the capital across multiple assets in a portfolio instead of investing in individual stocks, investors can reap benefits. Diversification into multiple stocks will help to protect an investor's capital when one individual stock is not performing well. The graph above clearly shows that the protfolio's value is much more stable compared to that of highly volatile Intel's stock. Additionally, portfolio's performance has improved against low performing JPMorgan and ExxonMobil individual stocks. Hence, we can conclude portfolio investment is able to deliver a balanced rate of return that is on average better than individual investment returns, because of the risk diversification among various investments inside a portfolio.
+> By spreading the capital across multiple assets in a portfolio instead of investing in individual stocks, investors can reap benefits. Diversification into multiple stocks will help to protect an investor's capital when one individual stock is not performing well. The graph above clearly shows that the protfolio's value is much more stable compared to that of highly volatile Intel's stock. Additionally, portfolio's performance has improved against low performing JPMorgan and ExxonMobil individual stocks. Hence, we can conclude portfolio investment is able to deliver a balanced rate of return that is on average better than individual investment returns, because of the risk diversification among various investments inside a portfolio.
