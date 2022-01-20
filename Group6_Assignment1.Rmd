@@ -93,6 +93,8 @@ ggplot(data = GE, aes(x = date)) +
        x = "",
        y = "Value")
 ```
+>
+> The two figures above showcase Microsoft and GE's monthly total returns, including (red) and excluding (blue) emitted dividends. Microsoft started paying dividends in 2003, which is reflected in the plot, whilst GE started paying them in 1989. It is interesting to note that despite being in different industries, both companies return  follow a similar pattern, however at different values (Microsoft's being much higher, reaching 90+ in the early 2000s). Both companies seem to have been impacted by current events, with a dip in 2001, and another in 2008. However, Microsoft recovered from the 2007-2008 financial crisis and is now at his highest value, whilst GE did not recover as well. Nowaday it is still suffering from its own scandals, being accused of fraud in 2019.
 
 ```{r S&P Total return, warning=FALSE, message = FALSE, fig.width=7, fig.height=5}
 
@@ -114,6 +116,9 @@ ggplot(data = SP500, aes(x = date)) +
        x = "",
        y = "Value")
 ```
+>
+>Similarly, looking at the S&P 500 index in the above figure, it is a good reflection of current events, with dips around political and financial crisis (2001, 2008). However, it exhibits a steady growth after recovering from 2008, with a slight dip around presidential elections (for instance 2012) which could reflect uncertainty and caution at the time. 
+
 
 ## Q3
 
@@ -177,6 +182,9 @@ paste0("Skewness of SP500 Log Monthly Returns: ", round(skewness(SP500$SP500_LRE
 paste0("Kurtosis of SP500 Log Monthly Returns: ", round(kurtosis(SP500$SP500_LRET), 2))
 
 ```
+
+> 
+>Comparing the stocks, it is interesting to note that Microsoft exhibited the most risk, with the highest variance. This means that GE's returns will be closer to their mean than MSFT's, but MSFT's mean is higher; taking a greater risk could lead to higher returns. As SP500 is an index, it exhibits low variance. Lastly, GE seems to have the most outliers, with a higher kurtosis.
 
 ```{r plotting the lograthmic return for microsoft, fig.height=7, fig.width=8}
 
@@ -287,7 +295,8 @@ ggplot(data = MSFT_GE_SP500, aes(x = date)) +
 
 ```
 
-Comparing with indices from above, it is the same as the total return indices with dividends reinvested.
+>
+> As established in the above comments, the daily total returns exhibit a similar pattern to the monthly ones with dividends reinvested. Microsoft's high risk and potential returns is quite clear in this figure. Both Microsoft and GE's have exhibited higher return than the S&P500 index. 
 
 ## Q6
 
