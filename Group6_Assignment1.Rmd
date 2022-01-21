@@ -1,5 +1,5 @@
 ---
-title: "Group6_Assignment1"
+title: "Group6_Assignment1: Tanisha Yadav, Zhicong Hu, Roman Vazquez Lorenzo, Emma Flutsch, Sarah Wu "
 output: html_document
 ---
 
@@ -24,7 +24,7 @@ library(moments)
 
 ## Introduction
 
-[Tanisha]
+In this assignment, we aim to understand the daily and monthly movement of prices and returns of six different stocks. We also compared the total return with and without investing dividends. I utilize the line graphs and statistical properties such as mean, variance, skewness and Kurtosis to comprehend the returns for Microsoft, GE and S&P500. After conducting our analysis on individual securities, we went ahead and looked at the portfolio's risks and returns. 
 
 ## Q1
 
@@ -546,7 +546,7 @@ for (ticker in c(sample_tickers, "SPRTRN")) {
 
 ```
 
-[\*y is correlation coefficient, lag means shifting by one day, opposite change direction each day?]
+> The autocorrelation function is a statistical technique we are using to plot the correlation coefficient against the lag, which is measured in terms of a number of periods. 
 
 ## Q11
 
