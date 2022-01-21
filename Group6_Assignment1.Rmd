@@ -93,8 +93,8 @@ ggplot(data = GE, aes(x = date)) +
        x = "",
        y = "Value")
 ```
->
-> The two figures above showcase Microsoft and GE's monthly total returns, including (red) and excluding (blue) emitted dividends. Microsoft started paying dividends in 2003, which is reflected in the plot, whilst GE started paying them in 1989. It is interesting to note that despite being in different industries, both companies return  follow a similar pattern, however at different values (Microsoft's being much higher, reaching 90+ in the early 2000s). Both companies seem to have been impacted by current events, with a dip in 2001, and another in 2008. However, Microsoft recovered from the 2007-2008 financial crisis and is now at his highest value, whilst GE did not recover as well. Nowaday it is still suffering from its own scandals, being accused of fraud in 2019.
+
+> The two figures above showcase Microsoft and GE's monthly total returns, including (red) and excluding (blue) emitted dividends. Microsoft started paying dividends in 2003, which is reflected in the plot, whilst GE started paying them in 1989. It is interesting to note that despite being in different industries, both companies return follow a similar pattern, however at different values (Microsoft's being much higher, reaching 90+ in the early 2000s). Both companies seem to have been impacted by current events, with a dip in 2001, and another in 2008. However, Microsoft recovered from the 2007-2008 financial crisis and is now at his highest value, whilst GE did not recover as well. Nowaday it is still suffering from its own scandals, being accused of fraud in 2019.
 
 ```{r S&P Total return, warning=FALSE, message = FALSE, fig.width=7, fig.height=5}
 
@@ -116,9 +116,8 @@ ggplot(data = SP500, aes(x = date)) +
        x = "",
        y = "Value")
 ```
->
->Similarly, looking at the S&P 500 index in the above figure, it is a good reflection of current events, with dips around political and financial crisis (2001, 2008). However, it exhibits a steady growth after recovering from 2008, with a slight dip around presidential elections (for instance 2012) which could reflect uncertainty and caution at the time. 
 
+> Similarly, looking at the S&P 500 index in the above figure, it is a good reflection of current events, with dips around political and financial crisis (2001, 2008). However, it exhibits a steady growth after recovering from 2008, with a slight dip around presidential elections (for instance 2012) which could reflect uncertainty and caution at the time.
 
 ## Q3
 
@@ -183,8 +182,7 @@ paste0("Kurtosis of SP500 Log Monthly Returns: ", round(kurtosis(SP500$SP500_LRE
 
 ```
 
-> 
->Comparing the stocks, it is interesting to note that Microsoft exhibited the most risk, with the highest variance. This means that GE's returns will be closer to their mean than MSFT's, but MSFT's mean is higher; taking a greater risk could lead to higher returns. As SP500 is an index, it exhibits low variance. Lastly, GE seems to have the most outliers, with a higher kurtosis.
+> Comparing the stocks, it is interesting to note that Microsoft exhibited the most risk, with the highest variance. This means that GE's returns will be closer to their mean than MSFT's, but MSFT's mean is higher; taking a greater risk could lead to higher returns. As SP500 is an index, it exhibits low variance. Lastly, GE seems to have the most outliers, with a higher kurtosis.
 
 ```{r plotting the lograthmic return for microsoft, fig.height=7, fig.width=8}
 
@@ -295,8 +293,7 @@ ggplot(data = MSFT_GE_SP500, aes(x = date)) +
 
 ```
 
->
-> As established in the above comments, the daily total returns exhibit a similar pattern to the monthly ones with dividends reinvested. Microsoft's high risk and potential returns is quite clear in this figure. Both Microsoft and GE's have exhibited higher return than the S&P500 index. 
+> As established in the above comments, the daily total returns exhibit a similar pattern to the monthly ones with dividends reinvested. Microsoft's high risk and potential returns is quite clear in this figure. Both Microsoft and GE's have exhibited higher return than the S&P500 index.
 
 ## Q6
 
@@ -355,6 +352,8 @@ paste0("Skewness of SP500 Log Daily Returns: ", round(skewness(MSFT_GE_SP500$SPR
 paste0("Kurtosis of SP500 Log Daily Returns: ", round(kurtosis(MSFT_GE_SP500$SPRTRN_LRET), 2))
 ```
 
+> Looking at the statistics for daily returns, we find that Microsoft still exhibited the highest risk and highest return, with the largest variance and highest mean return (both log and arithmetic). However, the scale of both mean and variance is significantly smaller than the monthly return situation, which is expected since day-to-day changes in returns would be generally less volatile and prices may revert often. Similarly to monthly situation, SP500 exhibits low variance as a benchmark. Additionally, Microsoft has the least outliers, with the lowest kurtosis.
+
 ## Q7
 
 MSFT
@@ -404,6 +403,66 @@ paste0("Variance of SP500 Log Daily Returns: ", round(var(MSFT_GE_SP500$SPRTRN_L
 paste0("Skewness of SP500 Log Daily Returns: ", round(skewness(MSFT_GE_SP500$SPRTRN_LRET), 2))
 paste0("Kurtosis of SP500 Log Daily Returns: ", round(kurtosis(MSFT_GE_SP500$SPRTRN_LRET), 2))
 ```
+
+Histogram
+
+```{r distribution for monthly log returns}
+
+# MSFT
+MSFT %>% 
+  ggplot()+
+  geom_histogram(aes(x = MSFT_LRET, y = ..density..), fill = "tomato3")+
+  stat_function(fun = dnorm, args = list(mean = mean(MSFT$MSFT_LRET), 
+                                           sd = sd(MSFT$MSFT_LRET)))+
+  labs(x = "Log Returns", title = paste("MSFT Monthly Holding Period Log Returns", "(", min(MSFT$date), "to", max(MSFT$date), ")"))+
+  theme_minimal()
+
+# GE
+GE %>% 
+  ggplot()+
+  geom_histogram(aes(x = GE_LRET, y = ..density..), fill = "royalblue2")+
+  stat_function(fun = dnorm, args = list(mean = mean(GE$GE_LRET), 
+                                           sd = sd(GE$GE_LRET)))+
+  labs(x = "Log Returns", title = paste("GE Monthly Holding Period Log Returns", "(", min(GE$date), "to", max(GE$date), ")"))+
+  theme_minimal()
+
+# S&P500
+SP500 %>% 
+  ggplot()+
+  geom_histogram(aes(x = SP500_LRET, y = ..density..), fill = "grey60")+
+  stat_function(fun = dnorm, args = list(mean = mean(SP500$SP500_LRET), 
+                                           sd = sd(SP500$SP500_LRET)))+
+  labs(x = "Log Returns", title = paste("S&P 500 Monthly Holding Period Log Returns", "(", min(SP500$date), "to", max(SP500$date), ")"))+
+  theme_minimal()
+```
+
+```{r ditribution of daily log returns}
+# MSFT
+MSFT_GE_SP500 %>% 
+  ggplot()+
+    geom_histogram(aes(x = MSFT_LRET, y = ..density..), fill = "tomato3")+
+    stat_function(fun = dnorm, args = list(mean = mean(MSFT_GE_SP500$MSFT_LRET), sd = sd(MSFT_GE_SP500$MSFT_LRET)))+
+    labs(title = paste("MSFT Daily Holding Period Log Returns ", "(", min(MSFT_GE_SP500$date), "to", max(MSFT_GE_SP500$date), ")"))+
+    theme_minimal()
+
+# GE
+MSFT_GE_SP500 %>% 
+  ggplot()+
+    geom_histogram(aes(x = GE_LRET, y = ..density..), fill = "royalblue2")+
+    stat_function(fun = dnorm, args = list(mean = mean(MSFT_GE_SP500$GE_LRET), sd = sd(MSFT_GE_SP500$GE_LRET)))+
+    labs(title = paste("MSFT Daily Holding Period Log Returns ", "(", min(MSFT_GE_SP500$date), "to", max(MSFT_GE_SP500$date), ")"))+
+    theme_minimal()
+
+# S&P500
+MSFT_GE_SP500 %>% 
+  ggplot()+
+    geom_histogram(aes(x = SPRTRN_LRET, y = ..density..), fill = "grey60")+
+    stat_function(fun = dnorm, args = list(mean = mean(MSFT_GE_SP500$SPRTRN_LRET), sd = sd(MSFT_GE_SP500$SPRTRN_LRET)))+
+    labs(title = paste("MSFT Daily Holding Period Log Returns ", "(", min(MSFT_GE_SP500$date), "to", max(MSFT_GE_SP500$date), ")"))+
+    theme_minimal()
+```
+
+> The empirical distributions of the monthly and daily log returns for the three chosen stocks are all normal looking in that they are roughly symmetrical without very obvious skewness. The monthly distributions exhibit a bit of left skew, especially for GE and S&P 500.
 
 ## Q8
 
@@ -458,7 +517,7 @@ cor((selection %>% select(ends_with("LRET")))^2)
 >
 > Where $\sigma$ is the covariance, $N$ the sample size, $r$ the return and $\bar{r}$ the average return for stocks $i$ and $j$. In this case, we evaluate and compare logarithmic returns of JPM, XOM, INTC and the S&P500.
 >
-> Looking at the 1st covariance table (using normal log returns), we immediately observe that all covariance values are positive, meaning that all stocks tend to move together; ie. if XOM has a positive return, JPM will tend to have a positive return as well and viceversa. We can also see that highest covariance (>0.6) comes when including the S&P in the comparison. This is logical as the S&P provides a broad indication of the market performance each day, and the stocks being analysed contribute to the S&P500 performance as they are part of the index. Lastly, covariance between JPM, XOM and INTC is in all cases around 0.3, with the lowest covariance being between XOM and INTC (\~0.275) and the highest between JPM and INTC (\~0.383).
+> Looking at the 1st covariance table (using normal log returns), we immediately observe that all covariance values are positive, meaning that all stocks tend to move together; ie. if XOM has a positive return, JPM will tend to have a positive return as well and viceversa. We can also see that highest covariance (\>0.6) comes when including the S&P in the comparison. This is logical as the S&P provides a broad indication of the market performance each day, and the stocks being analysed contribute to the S&P500 performance as they are part of the index. Lastly, covariance between JPM, XOM and INTC is in all cases around 0.3, with the lowest covariance being between XOM and INTC (\~0.275) and the highest between JPM and INTC (\~0.383).
 >
 > Using squared log returns, we can obtain a proxy of daily volatility. Using these and calculating the covariance matrix for all our stocks, we observe whether high daily volatility of one stock can indicate high daily volatility for another. From the matrix obtained, we once again observe highest covariance when stocks are compared to the S&P (0.71 for XOM, 0.54 for JPM and 0.30 for INTC) and a covariance of around \~0.18 when comparing XOM, JPM and INTC between one another. Overall, covariance values are lower than the ones using normal returns, meaning that daily volatility for one stock is less of a valuable indicator of the volatility of another stock.
 >
