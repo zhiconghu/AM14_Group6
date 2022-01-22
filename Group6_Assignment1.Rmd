@@ -150,7 +150,7 @@ data.frame(`MSFT Normal` = c(mean(MSFT$MSFT_RET), var(MSFT$MSFT_RET), skewness(M
 row.names = c("Mean", "Variance", "Skewness", "Kurtosis")) %>% 
   mutate_if(is.numeric, round, digits = 4) %>% 
   kbl() %>% 
-  kable_classic_2() %>% 
+  kable_classic_2(font_size = 20) %>% 
   add_header_above(c(" " = 1, "Normal Return" = 3, "Log Return" = 3))
 
 ```
@@ -159,7 +159,7 @@ row.names = c("Mean", "Variance", "Skewness", "Kurtosis")) %>%
 >
 > [add comments on why we use log returns? \* talk about some benefits]
 
-```{r plotting the lograthmic return for microsoft, fig.height=7, fig.width=8}
+```{r plotting the lograthmic return for microsoft, fig.width=8, fig.height=5}
 
 MSFT %>% 
   select(`Normal Return` = MSFT_RET, `Log Return` = MSFT_LRET) %>% 
@@ -209,7 +209,7 @@ daily_data <- daily_data %>% mutate_if(is.character, as.numeric)
 
 ## Q5
 
-```{r daily total return, fig.width=7, fig.height=5}
+```{r daily total return, fig.width=8, fig.height=5}
 
 MSFT_GE_SP500 <- daily_data %>% 
   select(date, MSFT_RET, GE_RET, SPRTRN_RET) %>% 
@@ -262,7 +262,7 @@ data.frame(`MSFT Normal` = c(mean(MSFT_GE_SP500$MSFT_RET), var(MSFT_GE_SP500$MSF
 row.names = c("Mean", "Variance", "Skewness", "Kurtosis")) %>% 
   mutate_if(is.numeric, round, digits = 5) %>% 
   kbl() %>% 
-  kable_classic_2() %>% 
+  kable_classic_2(font_size = 20) %>% 
   add_header_above(c(" " = 1, "Normal Return" = 3, "Log Return" = 3))
 
 ```
@@ -294,7 +294,7 @@ data.frame(`MSFT Normal` = c(mean(MSFT_GE_SP500$MSFT_RET), var(MSFT_GE_SP500$MSF
 row.names = c("Mean", "Variance", "Skewness", "Kurtosis")) %>% 
   mutate_if(is.numeric, round, digits = 5) %>% 
   kbl() %>% 
-  kable_classic_2() %>% 
+  kable_classic_2(font_size = 20) %>% 
   add_header_above(c(" " = 1, "MSFT" = 2, "GE" = 2, "SP500" = 2))
 
 ```
@@ -450,7 +450,7 @@ portfolio <- selection %>%
 
 ## Q12
 
-```{r portfolio returns, warning=FALSE, message=FALSE}
+```{r portfolio returns, warning=FALSE, message=FALSE, fig.width=8, fig.height=5}
 # Portfolio return
 portfolio$Portfolio_RET <- as(portfolio %>% 
                                 select(starts_with(sample_tickers)), "matrix") %*% arbitrary_weights
@@ -478,3 +478,4 @@ ggplot(portfolio, aes(x = date)) +
 ```
 
 > By spreading the capital across multiple assets in a portfolio instead of investing in individual stocks, investors can reap benefits. Diversification into multiple stocks will help to protect an investor's capital when one individual stock is not performing well. The graph above clearly shows that the protfolio's value is much more stable compared to that of highly volatile Intel's stock. Additionally, portfolio's performance has improved against low performing JPMorgan and ExxonMobil individual stocks. Hence, we can conclude portfolio investment is able to deliver a balanced rate of return that is on average better than individual investment returns, because of the risk diversification among various investments inside a portfolio.
+
