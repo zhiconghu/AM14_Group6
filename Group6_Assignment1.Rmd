@@ -24,7 +24,7 @@ library(moments)
 
 ## Introduction
 
-In this assignment, we aim to understand the daily and monthly movement of prices and returns of six different stocks. We also compared the total return with and without investing dividends. I utilize the line graphs and statistical properties such as mean, variance, skewness and Kurtosis to comprehend the returns for Microsoft, GE and S&P500. After conducting our analysis on individual securities, we went ahead and looked at the portfolio's risks and returns. 
+In this assignment, we aim to understand the daily and monthly movement of prices and returns of six different stocks. We also compared the total return with and without investing dividends. I utilize the line graphs and statistical properties such as mean, variance, skewness and Kurtosis to comprehend the returns for Microsoft, GE and S&P500. After conducting our analysis on individual securities, we went ahead and looked at the portfolio's risks and returns.
 
 ## Q1
 
@@ -360,9 +360,15 @@ paste0("Skewness of SP500 Log Daily Returns: ", round(skewness(MSFT_GE_SP500$SPR
 paste0("Kurtosis of SP500 Log Daily Returns: ", round(kurtosis(MSFT_GE_SP500$SPRTRN_LRET), 2))
 ```
 
-> Looking at the statistics for daily returns, we find that Microsoft still exhibited the highest risk and highest return, with the largest variance and highest mean return (both log and arithmetic). However, the scale of both mean and variance is significantly smaller than the monthly return situation, which is expected since day-to-day changes in returns would be generally less volatile and prices may revert often. Similarly to monthly situation, SP500 exhibits low variance as a benchmark. Additionally, Microsoft has the least outliers, with the lowest kurtosis.
+> Looking at the statistics for daily returns, we find that Microsoft still exhibited the highest risk and highest return, with the largest variance and highest mean return (both log and simple). However, the scale of both mean and variance is significantly smaller than the monthly return situation, which is expected since day-to-day changes in returns would be generally less volatile and prices may revert often. Similarly to monthly situation, SP500 exhibits low variance as a benchmark. Additionally, Microsoft has the least outliers, with the lowest kurtosis.
 >
 > [how are daily and monthly related? daily\*time = monthly? ]
+>
+> Simple daily return rates can be compounded to get the monthly returns, which is given by the following equation (assuming 20-day trading period per month).
+>
+> $\text { Monthly return }=\left[(\text { Daily return }+1)^{20}-1\right] * 100$
+>
+> On the other hand, log daily returns are additive and can be directly added up to get the monthly returns, which is more straightforward.
 
 ## Q7
 
@@ -472,9 +478,9 @@ MSFT_GE_SP500 %>%
     theme_minimal()
 ```
 
-> The empirical distributions of the monthly and daily log returns for the three chosen stocks are all normal looking in that they are roughly symmetrical without very obvious skewness. The monthly distributions exhibit a bit of left skew, especially for GE and S&P 500.
+> The empirical distributions of the monthly and daily log returns for the three chosen stocks are all normal looking in that they are roughly symmetrical without very obvious skewness, probably due to Central Limit Therom given the large data set we use. However, the monthly distributions exhibit a bit of left skew, especially for GE and S&P 500, probably due to some negative market shocks.
 >
-> [CLT? variance lower log return ]
+> It is also worth noting that the distribution of log returns are more strictly normal and are of lower variance than that of simple returns.
 
 ## Q8
 
@@ -546,7 +552,7 @@ for (ticker in c(sample_tickers, "SPRTRN")) {
 
 ```
 
-> The autocorrelation function is a statistical technique we are using to plot the correlation coefficient against the lag, which is measured in terms of a number of periods. 
+> The autocorrelation function is a statistical technique we are using to plot the correlation coefficient against the lag, which is measured in terms of a number of periods.
 
 ## Q11
 
