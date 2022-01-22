@@ -1,5 +1,6 @@
 ---
-title: "Group6_Assignment1: Tanisha Yadav, Zhicong Hu, Roman Vazquez Lorenzo, Emma Flutsch, Sarah Wu "
+title: "Group6_Assignment1"
+author: "Tanisha Yadav, Zhicong Hu, Roman Vazquez Lorenzo, Emma Flutsch, Sarah Wu"
 output: html_document
 ---
 
@@ -15,7 +16,7 @@ library(tidyverse)
 library(ggplot2)
 library(lubridate)
 library(moments)
-
+library(kableExtra)
 ```
 
 # Assignment 1: Prices, Returns and Portfolios
@@ -41,7 +42,7 @@ monthly_data$date <- ymd(monthly_data$date)
 
 ## Q2
 
-```{r Microsoft Total return, fig.width=7, fig.height=5,warning= FALSE, message=FALSE }
+```{r Microsoft Total return, fig.width=8, fig.height=5,warning= FALSE, message=FALSE }
 
 # Calculating the total return index for Microsoft
 MSFT <- data.frame(date = filter(monthly_data, TICKER == "MSFT")$date,
@@ -52,9 +53,7 @@ MSFT <- MSFT %>%
   mutate(MSFT_VALUE = cumprod(1 + MSFT_RET),
          MSFT_VALUEX = cumprod(1 + MSFT_RETX))
 
-paste0("Total Return of Microsoft reinvesting dividends: ", paste0(round(MSFT[nrow(MSFT),"MSFT_VALUE"], 4)*100, "%"))
-paste0("Total Return of Microsoft without reinvesting dividends: ", paste0(round(MSFT[nrow(MSFT),"MSFT_VALUEX"], 4)*100, "%"))
-
+cat(paste0("Total Return of Microsoft reinvesting dividends: ", paste0(round(MSFT[nrow(MSFT),"MSFT_VALUE"], 4)*100, "%"), "\nTotal Return of Microsoft without reinvesting dividends: ", paste0(round(MSFT[nrow(MSFT),"MSFT_VALUEX"], 4)*100, "%")))
 
 # Plotting the returns of Microsoft 
 ggplot(data = MSFT, aes(x = date)) +
@@ -70,7 +69,7 @@ ggplot(data = MSFT, aes(x = date)) +
        y = "Value")
 ```
 
-```{r General Electric Total return,warning=FALSE, message= FALSE, fig.width=7, fig.height=5}
+```{r General Electric Total return,warning=FALSE, message= FALSE, fig.width=8, fig.height=5}
 
 # Calculating the total return index for General Electric
 GE <- data.frame(date = filter(monthly_data, TICKER == "GE")$date,
@@ -81,8 +80,7 @@ GE <- GE %>%
   mutate(GE_VALUE = cumprod(1 + GE_RET),
          GE_VALUEX = cumprod(1 + GE_RETX))
 
-paste0("Total Return of Microsoft reinvesting dividends: ", paste0(round(GE[nrow(GE),"GE_VALUE"], 4)*100, "%"))
-paste0("Total Return of Microsoft without reinvesting dividends: ", paste0(round(GE[nrow(GE),"GE_VALUEX"], 4)*100, "%"))
+cat(paste0("Total Return of Microsoft reinvesting dividends: ", paste0(round(GE[nrow(GE),"GE_VALUE"], 4)*100, "%"), "\nTotal Return of Microsoft without reinvesting dividends: ", paste0(round(GE[nrow(GE),"GE_VALUEX"], 4)*100, "%")))
 
 # Plotting the returns of General Electric 
 ggplot(data = GE, aes(x = date)) +
@@ -98,11 +96,11 @@ ggplot(data = GE, aes(x = date)) +
        y = "Value")
 ```
 
-> The two figures above showcase Microsoft and GE's monthly total returns, including (red) and excluding (blue) emitted dividends. Microsoft started paying dividends in 2003, which is reflected in the plot, whilst GE started paying them in 1989. It is interesting to note that despite being in different industries, both companies return follow a similar pattern, however at different values (Microsoft's being much higher, reaching 90+ in the early 2000s). Both companies seem to have been impacted by current events, with a dip in 2001, and another in 2008. However, Microsoft recovered from the 2007-2008 financial crisis and is now at his highest value, whilst GE did not recover as well. Nowadays, it is still suffering from its own scandals, being accused of fraud in 2019.
+> The two figures above showcase Microsoft and GE's monthly total returns, including (red) and excluding (blue) emitted dividends. Microsoft started paying dividends in 2003, which is reflected in the plot, whilst GE started paying them in 1989. It is interesting to note that despite being in different industries, both companies return follow a similar pattern, however at different values (Microsoft's being much higher, reaching 90+ in the early 2000s). Both companies seem to have been impacted by current events, with a dip in 2001, and another in 2008. However, Microsoft recovered from the 2007-2008 financial crisis and is now at his highest value, whilst GE did not recover as well. Nowaday it is still suffering from its own scandals, being accused of fraud in 2019.
 >
 > [dividend impact on result? \* blue has no dividend and lower return, but why?-- less reinvestment]
 
-```{r S&P Total return, warning=FALSE, message = FALSE, fig.width=7, fig.height=5}
+```{r S&P Total return, warning=FALSE, message = FALSE, fig.width=8, fig.height=5}
 
 # Calculating the total return index for S&P 500
 SP500 <- data.frame(date = filter(monthly_data, TICKER == "MSFT")$date,
@@ -140,51 +138,20 @@ SP500$SP500_LRET <- log(1 + SP500$SP500_RET)
 
 ```
 
-```{r Statistics for Microsoft, collapse=TRUE}
-# MSFT
-# Mean, Variance, Skewness, Kurtosis of Normal Returns
-paste0("Mean of MSFT Normal Monthly Returns: ", round(mean(MSFT$MSFT_RET)*100, 2), "%")
-paste0("Variance of MSFT Normal Monthly Returns: ", round(var(MSFT$MSFT_RET)*100, 2), "%")
-paste0("Skewness of MSFT Normal Monthly Returns: ", round(skewness(MSFT$MSFT_RET), 2))
-paste0("Kurtosis of MSFT Normal Monthly Returns: ", round(kurtosis(MSFT$MSFT_RET), 2))
+```{r Statistics}
 
-# Mean, Variance, Skewness, Kurtosis of Log Returns
-paste0("Mean of MSFT Log Monthly Returns: ", round(mean(MSFT$MSFT_LRET)*100, 2), "%")
-paste0("Variance of MSFT Log Monthly Returns: ", round(var(MSFT$MSFT_LRET)*100, 2), "%")
-paste0("Skewness of MSFT Log Monthly Returns: ", round(skewness(MSFT$MSFT_LRET), 2))
-paste0("Kurtosis of MSFT Log Monthly Returns: ", round(kurtosis(MSFT$MSFT_LRET), 2))
-
-```
-
-```{r Statistics for GE, collapse=TRUE}
-# GE
-# Mean, Variance, Skewness, Kurtosis of Normal Returns
-paste0("Mean of GE Normal Monthly Returns: ", round(mean(GE$GE_RET)*100, 2), "%")
-paste0("Variance of GE Normal Monthly Returns: ", round(var(GE$GE_RET)*100, 2), "%")
-paste0("Skewness of GE Normal Monthly Returns: ", round(skewness(GE$GE_RET), 2))
-paste0("Kurtosis of GE Normal Monthly Returns: ", round(kurtosis(GE$GE_RET), 2))
-
-# Mean, Variance, Skewness, Kurtosis of Log Returns
-paste0("Mean of GE Log Monthly Returns: ", round(mean(GE$GE_LRET)*100, 2), "%")
-paste0("Variance of GE Log Monthly Returns: ", round(var(GE$GE_LRET)*100, 2), "%")
-paste0("Skewness of GE Log Monthly Returns: ", round(skewness(GE$GE_LRET), 2))
-paste0("Kurtosis of GE Log Monthly Returns: ", round(kurtosis(GE$GE_LRET), 2))
-
-```
-
-```{r Statistics for S&P500, collapse=TRUE}
-# S&P500
-# Mean, Variance, Skewness, Kurtosis of Normal Returns
-paste0("Mean of SP500 Normal Monthly Returns: ", round(mean(SP500$SP500_RET)*100, 2), "%")
-paste0("Variance of SP500 Normal Monthly Returns: ", round(var(SP500$SP500_RET)*100, 2), "%")
-paste0("Skewness of SP500 Normal Monthly Returns: ", round(skewness(SP500$SP500_RET), 2))
-paste0("Kurtosis of SP500 Normal Monthly Returns: ", round(kurtosis(SP500$SP500_RET), 2))
-
-# Mean, Variance, Skewness, Kurtosis of Log Returns
-paste0("Mean of SP500 Log Monthly Returns: ", round(mean(SP500$SP500_LRET)*100, 2), "%")
-paste0("Variance of SP500 Log Monthly Returns: ", round(var(SP500$SP500_LRET)*100, 2), "%")
-paste0("Skewness of SP500 Log Monthly Returns: ", round(skewness(SP500$SP500_LRET), 2))
-paste0("Kurtosis of SP500 Log Monthly Returns: ", round(kurtosis(SP500$SP500_LRET), 2))
+# Statistics
+data.frame(`MSFT Normal` = c(mean(MSFT$MSFT_RET), var(MSFT$MSFT_RET), skewness(MSFT$MSFT_RET), kurtosis(MSFT$MSFT_RET)),
+           `GE Normal` = c(mean(GE$GE_RET), var(GE$GE_RET), skewness(GE$GE_RET), kurtosis(GE$GE_RET)),           
+           `SP500 Normal` = c(mean(SP500$SP500_RET), var(SP500$SP500_RET), skewness(SP500$SP500_RET), kurtosis(SP500$SP500_RET)),
+           `MSFT Log` = c(mean(MSFT$MSFT_LRET), var(MSFT$MSFT_LRET), skewness(MSFT$MSFT_LRET), kurtosis(MSFT$MSFT_LRET)),
+           `GE Log` = c(mean(GE$GE_LRET), var(GE$GE_LRET), skewness(GE$GE_LRET), kurtosis(GE$GE_LRET)),
+           `SP500 Log` = c(mean(SP500$SP500_LRET), var(SP500$SP500_LRET), skewness(SP500$SP500_LRET), kurtosis(SP500$SP500_LRET)),
+row.names = c("Mean", "Variance", "Skewness", "Kurtosis")) %>% 
+  mutate_if(is.numeric, round, digits = 4) %>% 
+  kbl() %>% 
+  kable_classic_2() %>% 
+  add_header_above(c(" " = 1, "Normal Return" = 3, "Log Return" = 3))
 
 ```
 
@@ -206,42 +173,8 @@ MSFT %>%
          x = "",
          y = "")
 
-
 ```
 
-```{r plotting the lograthmic return for general electric, fig.height=7, fig.width=8}
-
-GE %>% 
-  select(`Normal Return` = GE_RET, `Log Return` = GE_LRET) %>% 
-  pivot_longer(everything(), names_to = "Type", values_to = "Return") %>% 
-  mutate(Type = factor(Type, levels = c("Normal Return", "Log Return"))) %>% 
-  ggplot(aes(x = Return, fill = Type)) +
-    geom_histogram(bins = 30, alpha = 0.9) +
-    theme_bw() +
-    theme(legend.position = "bottom") +
-    labs(title = "Monthly Returns of GE from 1990 - 2015",
-         x = "",
-         y = "")
-
-
-```
-
-```{r plotting the lograthmic return for S&P500, fig.height=7, fig.width=8}
-
-SP500 %>% 
-  select(`Normal Return` = SP500_RET, `Log Return` = SP500_LRET) %>% 
-  pivot_longer(everything(), names_to = "Type", values_to = "Return") %>% 
-  mutate(Type = factor(Type, levels = c("Normal Return", "Log Return"))) %>% 
-  ggplot(aes(x = Return, fill = Type)) +
-    geom_histogram(bins = 30, alpha = 0.9) +
-    theme_bw() +
-    theme(legend.position = "bottom") +
-    labs(title = "Monthly Returns of S&P500 from 1990 - 2015",
-         x = "",
-         y = "")
-
-
-```
 
 ## Q4
 
@@ -315,49 +248,23 @@ MSFT_GE_SP500$SPRTRN_LRET <- log(1 + MSFT_GE_SP500$SPRTRN_RET)
 
 ```
 
-```{r statistics for Microsoft daily returns, collapse=TRUE}
-# MSFT
-# Mean, Variance, Skewness, Kurtosis of Normal Returns
-paste0("Mean of MSFT Normal Daily Returns: ", round(mean(MSFT_GE_SP500$MSFT_RET)*100, 2), "%")
-paste0("Variance of MSFT Normal Daily Returns: ", round(var(MSFT_GE_SP500$MSFT_RET)*100, 2), "%")
-paste0("Skewness of MSFT Normal Daily Returns: ", round(skewness(MSFT_GE_SP500$MSFT_RET), 2))
-paste0("Kurtosis of MSFT Normal Daily Returns: ", round(kurtosis(MSFT_GE_SP500$MSFT_RET), 2))
+```{r statistics for daily returns}
 
-# Mean, Variance, Skewness, Kurtosis of Log Returns
-paste0("Mean of MSFT Log Daily Returns: ", round(mean(MSFT_GE_SP500$MSFT_LRET)*100, 2), "%")
-paste0("Variance of MSFT Log Daily Returns: ", round(var(MSFT_GE_SP500$MSFT_LRET)*100, 2), "%")
-paste0("Skewness of MSFT Log Daily Returns: ", round(skewness(MSFT_GE_SP500$MSFT_LRET), 2))
-paste0("Kurtosis of MSFT Log Daily Returns: ", round(kurtosis(MSFT_GE_SP500$MSFT_LRET), 2))
-```
+# Statistics
+data.frame(`MSFT Normal` = c(mean(MSFT_GE_SP500$MSFT_RET), var(MSFT_GE_SP500$MSFT_RET), skewness(MSFT_GE_SP500$MSFT_RET), kurtosis(MSFT_GE_SP500$MSFT_RET)),
+           `GE Normal` = c(mean(MSFT_GE_SP500$GE_RET), var(MSFT_GE_SP500$GE_RET), skewness(MSFT_GE_SP500$GE_RET), kurtosis(MSFT_GE_SP500$GE_RET)),           
+           `SP500 Normal` = c(mean(MSFT_GE_SP500$SPRTRN_RET), var(MSFT_GE_SP500$SPRTRN_RET), skewness(MSFT_GE_SP500$SPRTRN_RET),
+                              kurtosis(MSFT_GE_SP500$SPRTRN_RET)),
+           `MSFT Log` = c(mean(MSFT_GE_SP500$MSFT_LRET), var(MSFT_GE_SP500$MSFT_LRET), skewness(MSFT_GE_SP500$MSFT_LRET), kurtosis(MSFT_GE_SP500$MSFT_LRET)),
+           `GE Log` = c(mean(MSFT_GE_SP500$GE_LRET), var(MSFT_GE_SP500$GE_LRET), skewness(MSFT_GE_SP500$GE_LRET), kurtosis(MSFT_GE_SP500$GE_LRET)),
+           `SP500 Log` = c(mean(MSFT_GE_SP500$SPRTRN_LRET), var(MSFT_GE_SP500$SPRTRN_LRET), skewness(MSFT_GE_SP500$SPRTRN_LRET),
+                           kurtosis(MSFT_GE_SP500$SPRTRN_LRET)),
+row.names = c("Mean", "Variance", "Skewness", "Kurtosis")) %>% 
+  mutate_if(is.numeric, round, digits = 5) %>% 
+  kbl() %>% 
+  kable_classic_2() %>% 
+  add_header_above(c(" " = 1, "Normal Return" = 3, "Log Return" = 3))
 
-```{r statistics for GE daily returns, collapse=TRUE}
-# GE
-# Mean, Variance, Skewness, Kurtosis of Normal Returns
-paste0("Mean of GE Normal Daily Returns: ", round(mean(MSFT_GE_SP500$GE_RET)*100, 2), "%")
-paste0("Variance of GE Normal Daily Returns: ", round(var(MSFT_GE_SP500$GE_RET)*100, 2), "%")
-paste0("Skewness of GE Normal Daily Returns: ", round(skewness(MSFT_GE_SP500$GE_RET), 2))
-paste0("Kurtosis of GE Normal Daily Returns: ", round(kurtosis(MSFT_GE_SP500$GE_RET), 2))
-
-# Mean, Variance, Skewness, Kurtosis of Log Returns
-paste0("Mean of GE Log Daily Returns: ", round(mean(MSFT_GE_SP500$GE_LRET)*100, 2), "%")
-paste0("Variance of GE Log Daily Returns: ", round(var(MSFT_GE_SP500$GE_LRET)*100, 2), "%")
-paste0("Skewness of GE Log Daily Returns: ", round(skewness(MSFT_GE_SP500$GE_LRET), 2))
-paste0("Kurtosis of GE Log Daily Returns: ", round(kurtosis(MSFT_GE_SP500$GE_LRET), 2))
-```
-
-```{r statistics for S&P500 daily returns, collapse=TRUE}
-# S&P500
-# Mean, Variance, Skewness, Kurtosis of Normal Returns
-paste0("Mean of SP500 Normal Daily Returns: ", round(mean(MSFT_GE_SP500$SPRTRN_RET)*100, 2), "%")
-paste0("Variance of SP500 Normal Daily Returns: ", round(var(MSFT_GE_SP500$SPRTRN_RET)*100, 2), "%")
-paste0("Skewness of SP500 Normal Daily Returns: ", round(skewness(MSFT_GE_SP500$SPRTRN_RET), 2))
-paste0("Kurtosis of SP500 Normal Daily Returns: ", round(kurtosis(MSFT_GE_SP500$SPRTRN_RET), 2))
-
-# Mean, Variance, Skewness, Kurtosis of Log Returns
-paste0("Mean of SP500 Log Daily Returns: ", round(mean(MSFT_GE_SP500$SPRTRN_LRET)*100, 2), "%")
-paste0("Variance of SP500 Log Daily Returns: ", round(var(MSFT_GE_SP500$SPRTRN_LRET)*100, 2), "%")
-paste0("Skewness of SP500 Log Daily Returns: ", round(skewness(MSFT_GE_SP500$SPRTRN_LRET), 2))
-paste0("Kurtosis of SP500 Log Daily Returns: ", round(kurtosis(MSFT_GE_SP500$SPRTRN_LRET), 2))
 ```
 
 > Looking at the statistics for daily returns, we find that Microsoft still exhibited the highest risk and highest return, with the largest variance and highest mean return (both log and simple). However, the scale of both mean and variance is significantly smaller than the monthly return situation, which is expected since day-to-day changes in returns would be generally less volatile and prices may revert often. Similarly to monthly situation, SP500 exhibits low variance as a benchmark. Additionally, Microsoft has the least outliers, with the lowest kurtosis.
@@ -372,57 +279,29 @@ paste0("Kurtosis of SP500 Log Daily Returns: ", round(kurtosis(MSFT_GE_SP500$SPR
 
 ## Q7
 
-MSFT
+Statistical Properties
 
-```{r comparison of monthly and daily log returns of Microsoft, collapse=TRUE}
-# Mean, Variance, Skewness, Kurtosis of Monthly Log Returns
-paste0("Mean of MSFT Log Monthly Returns: ", round(mean(MSFT$MSFT_LRET)*100, 2), "%")
-paste0("Variance of MSFT Log Monthly Returns: ", round(var(MSFT$MSFT_LRET)*100, 2), "%")
-paste0("Skewness of MSFT Log Monthly Returns: ", round(skewness(MSFT$MSFT_LRET), 2))
-paste0("Kurtosis of MSFT Log Monthly Returns: ", round(kurtosis(MSFT$MSFT_LRET), 2))
+```{r comparison of monthly and daily log returns}
 
-# Mean, Variance, Skewness, Kurtosis of Daily Log Returns
-paste0("Mean of MSFT Log Daily Returns: ", round(mean(MSFT_GE_SP500$MSFT_LRET)*100, 2), "%")
-paste0("Variance of MSFT Log Daily Returns: ", round(var(MSFT_GE_SP500$MSFT_LRET)*100, 2), "%")
-paste0("Skewness of MSFT Log Daily Returns: ", round(skewness(MSFT_GE_SP500$MSFT_LRET), 2))
-paste0("Kurtosis of MSFT Log Daily Returns: ", round(kurtosis(MSFT_GE_SP500$MSFT_LRET), 2))
-```
+data.frame(`MSFT Normal` = c(mean(MSFT_GE_SP500$MSFT_RET), var(MSFT_GE_SP500$MSFT_RET), skewness(MSFT_GE_SP500$MSFT_RET), kurtosis(MSFT_GE_SP500$MSFT_RET)),
+           `MSFT Log` = c(mean(MSFT_GE_SP500$MSFT_LRET), var(MSFT_GE_SP500$MSFT_LRET), skewness(MSFT_GE_SP500$MSFT_LRET), kurtosis(MSFT_GE_SP500$MSFT_LRET)),
+           `GE Normal` = c(mean(MSFT_GE_SP500$GE_RET), var(MSFT_GE_SP500$GE_RET), skewness(MSFT_GE_SP500$GE_RET), kurtosis(MSFT_GE_SP500$GE_RET)),           
+           `GE Log` = c(mean(MSFT_GE_SP500$GE_LRET), var(MSFT_GE_SP500$GE_LRET), skewness(MSFT_GE_SP500$GE_LRET), kurtosis(MSFT_GE_SP500$GE_LRET)),
+           `SP500 Normal` = c(mean(MSFT_GE_SP500$SPRTRN_RET), var(MSFT_GE_SP500$SPRTRN_RET), skewness(MSFT_GE_SP500$SPRTRN_RET),
+                              kurtosis(MSFT_GE_SP500$SPRTRN_RET)),
+           `SP500 Log` = c(mean(MSFT_GE_SP500$SPRTRN_LRET), var(MSFT_GE_SP500$SPRTRN_LRET), skewness(MSFT_GE_SP500$SPRTRN_LRET),
+                           kurtosis(MSFT_GE_SP500$SPRTRN_LRET)),
+row.names = c("Mean", "Variance", "Skewness", "Kurtosis")) %>% 
+  mutate_if(is.numeric, round, digits = 5) %>% 
+  kbl() %>% 
+  kable_classic_2() %>% 
+  add_header_above(c(" " = 1, "MSFT" = 2, "GE" = 2, "SP500" = 2))
 
-GE
-
-```{r comparison of monthly and daily log returns of GE, collapse=TRUE}
-# Mean, Variance, Skewness, Kurtosis of Monthly Log Returns
-paste0("Mean of GE Log Monthly Returns: ", round(mean(GE$GE_LRET)*100, 2), "%")
-paste0("Variance of GE Log Monthly Returns: ", round(var(GE$GE_LRET)*100, 2), "%")
-paste0("Skewness of GE Log Monthly Returns: ", round(skewness(GE$GE_LRET), 2))
-paste0("Kurtosis of GE Log Monthly Returns: ", round(kurtosis(GE$GE_LRET), 2))
-
-# Mean, Variance, Skewness, Kurtosis of Daily Log Returns
-paste0("Mean of GE Log Daily Returns: ", round(mean(MSFT_GE_SP500$GE_LRET)*100, 2), "%")
-paste0("Variance of GE Log Daily Returns: ", round(var(MSFT_GE_SP500$GE_LRET)*100, 2), "%")
-paste0("Skewness of GE Log Daily Returns: ", round(skewness(MSFT_GE_SP500$GE_LRET), 2))
-paste0("Kurtosis of GE Log Daily Returns: ", round(kurtosis(MSFT_GE_SP500$GE_LRET), 2))
-```
-
-S&P 500
-
-```{r comparison of monthly and daily log returns of S&P500, collapse=TRUE}
-# Mean, Variance, Skewness, Kurtosis of Monthly Log Returns
-paste0("Mean of SP500 Log Monthly Returns: ", round(mean(SP500$SP500_LRET)*100, 2), "%")
-paste0("Variance of SP500 Log Monthly Returns: ", round(var(SP500$SP500_LRET)*100, 2), "%")
-paste0("Skewness of SP500 Log Monthly Returns: ", round(skewness(SP500$SP500_LRET), 2))
-paste0("Kurtosis of SP500 Log Monthly Returns: ", round(kurtosis(SP500$SP500_LRET), 2))
-
-# Mean, Variance, Skewness, Kurtosis of Daily Log Returns
-paste0("Mean of SP500 Log Daily Returns: ", round(mean(MSFT_GE_SP500$SPRTRN_LRET)*100, 2), "%")
-paste0("Variance of SP500 Log Daily Returns: ", round(var(MSFT_GE_SP500$SPRTRN_LRET)*100, 2), "%")
-paste0("Skewness of SP500 Log Daily Returns: ", round(skewness(MSFT_GE_SP500$SPRTRN_LRET), 2))
-paste0("Kurtosis of SP500 Log Daily Returns: ", round(kurtosis(MSFT_GE_SP500$SPRTRN_LRET), 2))
 ```
 
 Histogram
 
-```{r distribution for monthly log returns}
+```{r distribution for monthly log returns, message=FALSE, warning=FALSE}
 
 # MSFT
 MSFT %>% 
@@ -452,7 +331,7 @@ SP500 %>%
   theme_minimal()
 ```
 
-```{r ditribution of daily log returns}
+```{r ditribution of daily log returns, message=FALSE, warning=FALSE}
 # MSFT
 MSFT_GE_SP500 %>% 
   ggplot()+
@@ -535,13 +414,13 @@ cor((selection %>% select(ends_with("LRET")))^2)
 >
 > Where $\sigma$ is the covariance, $N$ the sample size, $r$ the return and $\bar{r}$ the average return for stocks $i$ and $j$. In this case, we evaluate and compare logarithmic returns of JPM, XOM, INTC and the S&P500.
 >
-> Looking at the 1st covariance table (using normal log returns), we immediately observe that all covariance values are positive, meaning that all stocks tend to move together; i.e., if XOM has a positive return, JPM will tend to have a positive return as well and vice versa. We can also see that highest covariance (\>0.6) comes when including the S&P in the comparison. This is logical as the S&P provides a broad indication of the market performance each day, and the stocks being analysed contribute to the S&P500 performance as they are part of the index. Lastly, covariance between JPM, XOM and INTC is in all cases around 0.3, with the lowest covariance being between XOM and INTC (\~0.275) and the highest between JPM and INTC (\~0.383).
+> Looking at the 1st covariance table (using normal log returns), we immediately observe that all covariance values are positive, meaning that all stocks tend to move together; ie. if XOM has a positive return, JPM will tend to have a positive return as well and viceversa. We can also see that highest covariance (\>0.6) comes when including the S&P in the comparison. This is logical as the S&P provides a broad indication of the market performance each day, and the stocks being analysed contribute to the S&P500 performance as they are part of the index. Lastly, covariance between JPM, XOM and INTC is in all cases around 0.3, with the lowest covariance being between XOM and INTC (\~0.275) and the highest between JPM and INTC (\~0.383).
 >
 > Using squared log returns, we can obtain a proxy of daily volatility. Using these and calculating the covariance matrix for all our stocks, we observe whether high daily volatility of one stock can indicate high daily volatility for another. From the matrix obtained, we once again observe highest covariance when stocks are compared to the S&P (0.71 for XOM, 0.54 for JPM and 0.30 for INTC) and a covariance of around \~0.18 when comparing XOM, JPM and INTC between one another. Overall, covariance values are lower than the ones using normal returns, meaning that daily volatility for one stock is less of a valuable indicator of the volatility of another stock.
 >
 > Using this information, when building a portfolio, we may want to select stocks with low covariance between each other, obtaining stocks that move opposite to each other and hence diversifying and reducing risk while obtaining the same expected return.
 
-## Q10\*
+## Q10
 
 ```{r plot ACF, warning=FALSE, message=FALSE}
 for (ticker in c(sample_tickers, "SPRTRN")) {
@@ -552,7 +431,9 @@ for (ticker in c(sample_tickers, "SPRTRN")) {
 
 ```
 
-> The autocorrelation function is a statistical technique we are using to plot the correlation coefficient against the lag, which is measured in terms of a number of periods.
+> From the ACF plots of log return for all three stocks and S&P 500 index, we observe that the correlation coefficient between the return of a stock on a particular day is negative correlated to the return of the same stock on previous days. This suggest the phenomenon of correction in stock prices.
+>
+> From the ACF plots of absolute log return, we can see that correlation coefficients drops when lag increase. This means that the return of a stock on a particular day is influenced more by returns of recent days than returns of days long past. We are able to see similar patterns from the ACF plots of squared log return.
 
 ## Q11
 
@@ -563,7 +444,6 @@ arbitrary_weights <- c(1/3, 1/3, 1/3)
 #portfolio
 portfolio <- selection %>% 
   select(date, starts_with(sample_tickers) & ends_with("RET") & !ends_with("LRET"))
-head(portfolio)
 ```
 
 > We have arbitrarily assigned the equal weights to the chosen three stocks. However, if we keep the weights fixed over time then we will be unable to benefit that much from the diversification of the assets in the portfolio. The purpose of the assigning weights is to safeguards the investors from undesirable risks. A stock's performance can vary over time, thus the percentage of the funds associated with the stocks will require a change with a change in the market conditions. Changing weights of the assets in the portfolio gives investors the opportunity to sell high and buy low, taking the gains from high-performing investments.
@@ -597,8 +477,4 @@ ggplot(portfolio, aes(x = date)) +
        y = "Value")
 ```
 
-> By spreading the capital across multiple assets in a portfolio instead of investing in individual stocks, investors can reap benefits. Diversification into multiple stocks will help to protect an investor's capital when one individual stock is not performing well. The graph above clearly shows that the portfolio's value is much more stable compared to that of highly volatile Intel's stock. Additionally, portfolio's performance has improved against low performing JPMorgan and ExxonMobil individual stocks. Hence, we can conclude portfolio investment is able to deliver a balanced rate of return that is on average better than individual investment returns, because of the risk diversification among various investments inside a portfolio.
-
-## Conclusion
-
-[Roman]
+> By spreading the capital across multiple assets in a portfolio instead of investing in individual stocks, investors can reap benefits. Diversification into multiple stocks will help to protect an investor's capital when one individual stock is not performing well. The graph above clearly shows that the protfolio's value is much more stable compared to that of highly volatile Intel's stock. Additionally, portfolio's performance has improved against low performing JPMorgan and ExxonMobil individual stocks. Hence, we can conclude portfolio investment is able to deliver a balanced rate of return that is on average better than individual investment returns, because of the risk diversification among various investments inside a portfolio.
