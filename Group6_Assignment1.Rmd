@@ -485,3 +485,5 @@ ggplot(portfolio, aes(x = date)) +
 ## Conclusion
 
 From the analysis of historical data of six assets, we have been able to identify the differences between calculating logarithmic and normal returns and between daily and monthly returns, as well as how returns and risk of different assets may be correlated to each other and how their current value is related to their past value. Most notably, we identified that log returns are preferred when having a look at time series data, as the compounding effect is captured more effectively and can be understood more intuitively. Having done that, a portfolio of three different assets was created and returns obtained from the portfolio were compared to investing in each asset individually, identifying that diversification and portfolio creation can lead to a more balanced rate of return and risk reduction.
+
+Having successfully achieved the aim of the assignment, several recommendations and next steps can be suggested.  
