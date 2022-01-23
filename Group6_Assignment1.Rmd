@@ -98,9 +98,10 @@ ggplot(data = GE, aes(x = date)) +
        y = "Value")
 ```
 
-> The two figures above showcase Microsoft and GE's monthly total returns, including (red) and excluding (blue) emitted dividends. Microsoft started paying dividends in 2003, which is reflected in the plot, whilst GE started paying them in 1989. It is interesting to note that despite being in different industries, both companies return follow a similar pattern, however at different values (Microsoft's being much higher, reaching 90+ in the early 2000s). Both companies seem to have been impacted by current events, with a dip in 2001, and another in 2008. However, Microsoft recovered from the 2007-2008 financial crisis and is now at his highest value, whilst GE did not recover as well. Nowaday it is still suffering from its own scandals, being accused of fraud in 2019.
+> The two figures above showcase Microsoft and GE's monthly total returns, including (red) and excluding (blue) the reinvestment of emitted dividends. The reinvestment of dividends allows for higher returns as it allows for generation of greater wealth in the long-term by compounding.
+> Microsoft started paying dividends in 2003, which is reflected in the plot, whilst GE started paying them in 1989. It is interesting to note that despite being in different industries, both companies return follow a similar pattern, however at different values (Microsoft's being much higher, reaching 90+ in the early 2000s). Both companies seem to have been impacted by current events, with a dip in 2001, and another in 2008. However, Microsoft recovered from the 2007-2008 financial crisis and is now at his highest value, whilst GE did not recover as well. Nowaday it is still suffering from its own scandals, being accused of fraud in 2019.
 >
-> \[dividend impact on result? \* blue has no dividend and lower return, but why?-- less reinvestment\]
+
 
 ```{r S&P Total return, warning=FALSE, message = FALSE, fig.width=8, fig.height=5}
 
@@ -158,8 +159,8 @@ row.names = c("Mean", "Variance", "Skewness", "Kurtosis")) %>%
 ```
 
 > Comparing the stocks, it is interesting to note that Microsoft exhibited the most risk, with the highest variance. This means that GE's returns will be closer to their mean than MSFT's, but MSFT's mean is higher; taking a greater risk could lead to higher returns. As SP500 is an index, it exhibits low variance. Lastly, GE seems to have the most outliers, with a higher kurtosis.
+> As we can see in the below figure, the normal and log returns exhibit a similar pattern; log returns are useful they are normalised, therefore, allow for better comparison. 
 >
-> \[add comments on why we use log returns? \* talk about some benefits\]
 
 ```{r plotting the lograthmic return for microsoft, fig.width=8, fig.height=5}
 
@@ -176,6 +177,7 @@ MSFT %>%
          y = "")
 
 ```
+
 
 ## Q4
 
