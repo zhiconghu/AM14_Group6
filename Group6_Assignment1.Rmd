@@ -25,9 +25,11 @@ library(kableExtra)
 
 ## Introduction
 
-In this assignment, we aim to understand the daily and monthly movement of prices and returns of six different stocks. We also compared the total return with and without investing dividends. I utilize the line graphs and statistical properties such as mean, variance, skewness and Kurtosis to comprehend the returns for Microsoft, GE and S&P500. After conducting our analysis on individual securities, we went ahead and looked at the portfolio's risks and returns.
+In this assignment, we aim to understand the daily and monthly movement of prices and returns of six different stocks. We also compared the total return with and without investing dividends. We utilize the line graphs and statistical properties such as mean, variance, skewness and Kurtosis to comprehend the returns for Microsoft, GE and S&P500. After conducting our analysis on individual securities, we went ahead and looked at the portfolio's risks and returns.
 
 ## Q1
+
+Data about Microsoft, ExxonMobil (previously Exxon), General Electric, JP Morgan Chase (previously Chemical Banking and Chase Manhattan), Intel, Citigroup (previously Primerica and Travellers Group) was downloaded from the CRSP (The Center for Research in Security Prices) data base via WRDS (Wharton Research Service). Additionally, it contains value-weighted total returns and total returns excluding dividends for the CRSP index that contains stocks from NYSE, AMEX, and NASDAQ, as well as the total return for the S&P 500 Composite Index.
 
 ```{r loading datasets, warning=FALSE, message=FALSE}
 # loading PS1 Monthly data
@@ -98,7 +100,7 @@ ggplot(data = GE, aes(x = date)) +
 
 > The two figures above showcase Microsoft and GE's monthly total returns, including (red) and excluding (blue) emitted dividends. Microsoft started paying dividends in 2003, which is reflected in the plot, whilst GE started paying them in 1989. It is interesting to note that despite being in different industries, both companies return follow a similar pattern, however at different values (Microsoft's being much higher, reaching 90+ in the early 2000s). Both companies seem to have been impacted by current events, with a dip in 2001, and another in 2008. However, Microsoft recovered from the 2007-2008 financial crisis and is now at his highest value, whilst GE did not recover as well. Nowaday it is still suffering from its own scandals, being accused of fraud in 2019.
 >
-> [dividend impact on result? \* blue has no dividend and lower return, but why?-- less reinvestment]
+> \[dividend impact on result? \* blue has no dividend and lower return, but why?-- less reinvestment\]
 
 ```{r S&P Total return, warning=FALSE, message = FALSE, fig.width=8, fig.height=5}
 
@@ -157,7 +159,7 @@ row.names = c("Mean", "Variance", "Skewness", "Kurtosis")) %>%
 
 > Comparing the stocks, it is interesting to note that Microsoft exhibited the most risk, with the highest variance. This means that GE's returns will be closer to their mean than MSFT's, but MSFT's mean is higher; taking a greater risk could lead to higher returns. As SP500 is an index, it exhibits low variance. Lastly, GE seems to have the most outliers, with a higher kurtosis.
 >
-> [add comments on why we use log returns? \* talk about some benefits]
+> \[add comments on why we use log returns? \* talk about some benefits\]
 
 ```{r plotting the lograthmic return for microsoft, fig.width=8, fig.height=5}
 
@@ -174,7 +176,6 @@ MSFT %>%
          y = "")
 
 ```
-
 
 ## Q4
 
@@ -269,7 +270,7 @@ row.names = c("Mean", "Variance", "Skewness", "Kurtosis")) %>%
 
 > Looking at the statistics for daily returns, we find that Microsoft still exhibited the highest risk and highest return, with the largest variance and highest mean return (both log and simple). However, the scale of both mean and variance is significantly smaller than the monthly return situation, which is expected since day-to-day changes in returns would be generally less volatile and prices may revert often. Similarly to monthly situation, SP500 exhibits low variance as a benchmark. Additionally, Microsoft has the least outliers, with the lowest kurtosis.
 >
-> [how are daily and monthly related? daily\*time = monthly? ]
+> \[how are daily and monthly related? daily\*time = monthly? \]
 >
 > Simple daily return rates can be compounded to get the monthly returns, which is given by the following equation (assuming 20-day trading period per month).
 >
@@ -414,7 +415,7 @@ cor((selection %>% select(ends_with("LRET")))^2)
 >
 > Where $\sigma$ is the covariance, $N$ the sample size, $r$ the return and $\bar{r}$ the average return for stocks $i$ and $j$. In this case, we evaluate and compare logarithmic returns of JPM, XOM, INTC and the S&P500.
 >
-> Looking at the 1st covariance table (using normal log returns), we immediately observe that all covariance values are positive, meaning that all stocks tend to move together; ie. if XOM has a positive return, JPM will tend to have a positive return as well and viceversa. We can also see that highest covariance (\>0.6) comes when including the S&P in the comparison. This is logical as the S&P provides a broad indication of the market performance each day, and the stocks being analysed contribute to the S&P500 performance as they are part of the index. Lastly, covariance between JPM, XOM and INTC is in all cases around 0.3, with the lowest covariance being between XOM and INTC (\~0.275) and the highest between JPM and INTC (\~0.383).
+> Looking at the 1st covariance table (using normal log returns), we immediately observe that all covariance values are positive, meaning that all stocks tend to move together; ie. if XOM has a positive return, JPM will tend to have a positive return as well and viceversa. We can also see that highest covariance (>0.6) comes when including the S&P in the comparison. This is logical as the S&P provides a broad indication of the market performance each day, and the stocks being analysed contribute to the S&P500 performance as they are part of the index. Lastly, covariance between JPM, XOM and INTC is in all cases around 0.3, with the lowest covariance being between XOM and INTC (\~0.275) and the highest between JPM and INTC (\~0.383).
 >
 > Using squared log returns, we can obtain a proxy of daily volatility. Using these and calculating the covariance matrix for all our stocks, we observe whether high daily volatility of one stock can indicate high daily volatility for another. From the matrix obtained, we once again observe highest covariance when stocks are compared to the S&P (0.71 for XOM, 0.54 for JPM and 0.30 for INTC) and a covariance of around \~0.18 when comparing XOM, JPM and INTC between one another. Overall, covariance values are lower than the ones using normal returns, meaning that daily volatility for one stock is less of a valuable indicator of the volatility of another stock.
 >
@@ -478,4 +479,3 @@ ggplot(portfolio, aes(x = date)) +
 ```
 
 > By spreading the capital across multiple assets in a portfolio instead of investing in individual stocks, investors can reap benefits. Diversification into multiple stocks will help to protect an investor's capital when one individual stock is not performing well. The graph above clearly shows that the protfolio's value is much more stable compared to that of highly volatile Intel's stock. Additionally, portfolio's performance has improved against low performing JPMorgan and ExxonMobil individual stocks. Hence, we can conclude portfolio investment is able to deliver a balanced rate of return that is on average better than individual investment returns, because of the risk diversification among various investments inside a portfolio.
-
