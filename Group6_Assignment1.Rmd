@@ -29,7 +29,7 @@ In this assignment, we aim to understand the daily and monthly movement of price
 
 ## Q1
 
-Data about Microsoft, ExxonMobil (previously Exxon), General Electric, JP Morgan Chase (previously Chemical Banking and Chase Manhattan), Intel, Citigroup (previously Primerica and Travellers Group) was downloaded from the CRSP (The Center for Research in Security Prices) data base via WRDS (Wharton Research Service). Additionally, it contains value-weighted total returns and total returns excluding dividends for the CRSP index that contains stocks from NYSE, AMEX, and NASDAQ, as well as the total return for the S&P 500 Composite Index.
+> Data about Microsoft, ExxonMobil (previously Exxon), General Electric, JP Morgan Chase (previously Chemical Banking and Chase Manhattan), Intel, Citigroup (previously Primerica and Travellers Group) was downloaded from the CRSP (The Center for Research in Security Prices) data base via WRDS (Wharton Research Service). Additionally, it contains value-weighted total returns and total returns excluding dividends for the CRSP index that contains stocks from NYSE, AMEX, and NASDAQ, as well as the total return for the S&P 500 Composite Index.
 
 ```{r loading datasets, warning=FALSE, message=FALSE}
 # loading PS1 Monthly data
@@ -178,6 +178,8 @@ MSFT %>%
 ```
 
 ## Q4
+
+> Two additional data sheets are downloaded, HPR Daily and Prices Daily. HPR Daily contains the daily holding period returns for the six stocks, the S&P 500 Composite Index and the value-weighted market portfolio (including dividends) from CRSP. Prices Daily contains the prices for the six stocks and the S&P 500 Composite Index.
 
 ```{r PS1 daily, message=FALSE, warning=FALSE}
 # loading HPR Daily Sheet   
@@ -417,7 +419,7 @@ cor((selection %>% select(ends_with("LRET")))^2)
 >
 > Looking at the 1st covariance table (using normal log returns), we immediately observe that all covariance values are positive, meaning that all stocks tend to move together; ie. if XOM has a positive return, JPM will tend to have a positive return as well and viceversa. We can also see that highest covariance (>0.6) comes when including the S&P in the comparison. This is logical as the S&P provides a broad indication of the market performance each day, and the stocks being analysed contribute to the S&P500 performance as they are part of the index. Lastly, covariance between JPM, XOM and INTC is in all cases around 0.3, with the lowest covariance being between XOM and INTC (\~0.275) and the highest between JPM and INTC (\~0.383).
 >
-> Using squared log returns, we can obtain a proxy of daily volatility. Using these and calculating the covariance matrix for all our stocks, we observe whether high daily volatility of one stock can indicate high daily volatility for another. From the matrix obtained, we once again observe highest covariance when stocks are compared to the S&P (0.71 for XOM, 0.54 for JPM and 0.30 for INTC) and a covariance of around \~0.18 when comparing XOM, JPM and INTC between one another. Overall, covariance values are lower than the ones using normal returns, meaning that daily volatility for one stock is less of a valuable indicator of the volatility of another stock.
+> Using squared log returns, we can obtain a proxy of daily volatility, allowing us to understand the risk of each stock. Using these and calculating the covariance matrix for all our stocks, we observe whether high daily volatility of one stock can indicate high daily volatility for another. From the matrix obtained, we once again observe highest covariance when stocks are compared to the S&P (0.71 for XOM, 0.54 for JPM and 0.30 for INTC) and a covariance of around \~0.18 when comparing XOM, JPM and INTC between one another. Overall, covariance values are lower than the ones using normal returns, meaning that daily volatility for one stock is less of a valuable indicator of the volatility of another stock.
 >
 > Using this information, when building a portfolio, we may want to select stocks with low covariance between each other, obtaining stocks that move opposite to each other and hence diversifying and reducing risk while obtaining the same expected return.
 
