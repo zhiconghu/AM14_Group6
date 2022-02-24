@@ -1,0 +1,160 @@
+---
+title: "Group6_Assignment4"
+author: "Zhicong Hu"
+date: "23/02/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r loadlibraries, include = FALSE , message=FALSE, warning=FALSE}
+library(here)
+library(readxl)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(lubridate)
+library(moments)
+library(kableExtra)
+```
+
+# Assignment 4: Measuring Financial Risk and Big Data
+
+## AM14 Empirical Finance - Study Group 6
+
+## Introduction
+
+
+## Q1: Implementing Value at Risk (VaR) in R
+
+**Pick three stocks from the daily stock returns data set (PS1 Daily.xlsx) and transform these simple returns to log returns.**
+
+```{r message=FALSE, warning=FALSE}
+data <- read_excel(here("Data", "PS1_Daily.xlsx"), sheet = "HPR_daily")
+colnames(data) <- data[1,]
+data <- data[-1,]
+
+# Convert date column to date variable
+data$DATE <- ymd(data$DATE)
+
+# Convert all other columns to numeric 
+data <- data %>% mutate_if(is.character, as.numeric)
+
+# Pick MSFT, INTC, JPM
+data <- data %>% select(DATE, MSFT, INTC, JPM)
+
+# Transform to log returns
+data[c("MSFT","INTC","JPM")] <- lapply(data[c("MSFT","INTC","JPM")], function(vector) log(1+vector)) %>% as.data.frame()
+```
+
+**Estimate three volatility time series for each of these three stocks by either using a MA (10 weeks) or an EWMA ($\lambda = 0.94$ and $\sigma_{0}^2=\frac{1}{T}\sum^{T}_{t=1}\sigma_{t}^2$, where T is number of observations of daily returns in your sample) model.**
+
+```{r}
+# Parameters for MA
+window_length <- 50
+
+# Initiate columns for MA
+data$MSFT_MA <- NA
+data$INTC_MA <- NA
+data$JPM_MA <- NA
+
+# For loop to calculate EWMA
+for (i in (window_length+1):nrow(data)) {
+  data[i, "MSFT_MA"] <- sum(data[(i-window_length):(i-1), "MSFT"]^2)/window_length
+  data[i, "INTC_MA"] <- sum(data[(i-window_length):(i-1), "INTC"]^2)/window_length
+  data[i, "JPM_MA"] <- sum(data[(i-window_length):(i-1), "JPM"]^2)/window_length
+}
+
+# Parameters for EWMA
+lambda <- 0.94
+initial_EWMA <- c(sum(data$MSFT^2)/length(data$MSFT),
+                  sum(data$INTC^2)/length(data$INTC),
+                  sum(data$JPM^2)/length(data$JPM))
+
+# Initiate columns for EWMA
+data$MSFT_EWMA <- c(initial_EWMA[1], rep(NA, nrow(data)-1))
+data$INTC_EWMA <- c(initial_EWMA[2], rep(NA, nrow(data)-1))
+data$JPM_EWMA <- c(initial_EWMA[3], rep(NA, nrow(data)-1))
+
+# For loop to calculate EWMA
+for (i in 2:nrow(data)) {
+  data[i, "MSFT_EWMA"] <- (1-lambda)*(data[(i-1), "MSFT"])^2 + lambda*(data[(i-1), "MSFT_EWMA"])
+  data[i, "INTC_EWMA"] <- (1-lambda)*(data[(i-1), "INTC"])^2 + lambda*(data[(i-1), "INTC_EWMA"])
+  data[i, "JPM_EWMA"] <- (1-lambda)*(data[(i-1), "JPM"])^2 + lambda*(data[(i-1), "JPM_EWMA"])
+}
+```
+
+**Based on these six time series (two volatility time series for each of the three stocks) calculate the daily one day Value-at-Risk (VaR) 95% assuming normality. That is, you should use the estimated volatility time series together with the following formula for conditional VaR assuming normality**
+
+$$VaR_{95\%,t} = \bar{r} - \Phi^{-1}(0.05) \times \sigma_{t}$$
+
+**where $\bar{r}$ is the mean return (i.e., the average return of the return series of interest up to time $t$), $\Phi^{-1}$ is the inverse of the standard normal cumulative density function and, hence, $\Phi^{-1}(0.05) = 1.65$ (the z score!). Moreover, $\sigma_{t}$ is your estimated volatility at time $t$.**
+
+```{r}
+# Parameters for VaR calculations
+phi <- 1.65
+
+# Initiate columns for MA VaR
+data$MSFT_MA_VaR <- NA
+data$INTC_MA_VaR <- NA
+data$JPM_MA_VaR <- NA
+
+# For loop to calculate MA VaR
+for (i in (window_length+1):nrow(data)) {
+  data[i, "MSFT_MA_VaR"] <- sum(data[1:(i-1), "MSFT"])/i - sqrt(phi*data[i, "MSFT_MA"])
+  data[i, "INTC_MA_VaR"] <- sum(data[1:(i-1), "INTC"])/i - sqrt(phi*data[i, "INTC_MA"])
+  data[i, "JPM_MA_VaR"] <- sum(data[1:(i-1), "JPM"])/i - sqrt(phi*data[i, "JPM_MA"])
+}
+
+# Initiate columns for EWMA VaR
+data$MSFT_EWMA_VaR <- NA
+data$INTC_EWMA_VaR <- NA
+data$JPM_EWMA_VaR <- NA
+
+# For loop to calculate EWMA VaR
+for (i in 2:nrow(data)) {
+  data[i, "MSFT_EWMA_VaR"] <- sum(data[1:(i-1), "MSFT"])/i - sqrt(phi*data[i, "MSFT_EWMA"])
+  data[i, "INTC_EWMA_VaR"] <- sum(data[1:(i-1), "INTC"])/i - sqrt(phi*data[i, "INTC_EWMA"])
+  data[i, "JPM_EWMA_VaR"] <- sum(data[1:(i-1), "JPM"])/i - sqrt(phi*data[i, "JPM_EWMA"])
+}
+
+# For the first day
+data[1, "MSFT_EWMA_VaR"] <- data[1, "MSFT"] - sqrt(phi*data[1, "MSFT_EWMA"])
+data[1, "INTC_EWMA_VaR"] <- data[1, "INTC"] - sqrt(phi*data[1, "INTC_EWMA"])
+data[1, "JPM_EWMA_VaR"] <- data[1, "JPM"] - sqrt(phi*data[1, "JPM_EWMA"])
+```
+
+**In a last step, you are supposed to ”backtest” your VaR estimates. That is, for each stock you now have three VaR series as well as the realized returns. With this data, count for each VaR estimate separately the number of violations. In other words, count the negative realized market returns that are more extreme than the VaR on this given day. For example, a violation of VaR occurs on a day when the realized returns is -9% and the VaR is -8%. How many violations would you expect if your VaR estimates were to be accurate (i.e., true)? How many violations do you observe? What do you conclude?**
+
+```{r}
+# Mutate violation column
+data <- data %>% 
+  mutate(MSFT_MA_VaR_violations = ifelse(MSFT < MSFT_MA_VaR, 1, 0),
+         INTC_MA_VaR_violations = ifelse(INTC < INTC_MA_VaR, 1, 0),
+         JPM_MA_VaR_violations = ifelse(JPM < JPM_MA_VaR, 1, 0),
+         MSFT_EWMA_VaR_violations = ifelse(MSFT < MSFT_EWMA_VaR, 1, 0),
+         INTC_EWMA_VaR_violations = ifelse(INTC < INTC_EWMA_VaR, 1, 0),
+         JPM_EWMA_VaR_violations = ifelse(JPM < JPM_EWMA_VaR, 1, 0),)
+```
+
+If our log return's are normally distributed, we will assume that the number of violations is around 5% of the total trading days.
+
+```{r}
+violations <- colSums(data %>% select(MSFT_MA_VaR_violations, INTC_MA_VaR_violations, JPM_MA_VaR_violations,
+                                      MSFT_EWMA_VaR_violations, INTC_EWMA_VaR_violations, JPM_EWMA_VaR_violations), na.rm = TRUE) 
+violations
+```
+
+```{r message=FALSE, warning=FALSE}
+data.frame(t(violations)) %>% 
+  pivot_longer(cols = everything(), names_to = "Type", values_to = "Number of Violations") %>% 
+  separate(Type, c("Stock", "Type")) %>% 
+  mutate(`Total Days` = ifelse(Type == "MA", nrow(data)-50, nrow(data))) %>% 
+  mutate(Percent = round((`Number of Violations`/`Total Days`)*100, 2)) %>% 
+  select(-`Number of Violations`, -`Total Days`) %>% 
+  pivot_wider(names_from = "Type", values_from = "Percent")
+```
+
+We can see that the percentage of violation is much higher than 5% for every stock, for both method of calculating volatility, 10 Week MA and EWMA. This suggest that the log returns of stocks are not normally distribution but instead has very heavy fat tails. Therefore, our assumption of normally distribution log returns and using Z-score for calculating VaR is invalid and results in higher than expected for number of violations.
