@@ -24,11 +24,11 @@ library(cowplot)
 
 # Assignment 4: Measuring Financial Risk and Big Data
 
-## AM14 Empirical Finance - Study Group 6
-
 ## Introduction
 
-**In this assignment, we aim to understand the financial risk in the market. We began the assignment with the implementation of Value at Risk which is a used to measure the riskiness in the market across the daily stock returns of three different stocks.We utilize the moving average and exponentially weighted moving average to build three volatility time series and used the six volatility time series to calculate the daily one day VAR. We also compared the number of violations for each VAR estimate. We ran Principal Component analysis and regressions to identify the factors affecting return variations across different portfolios and treasury bond returns. Finally, we looked at the implementation of various shrinkage methodologies. 
+In this assignment, we aim to understand the financial risk in the market. We began the assignment with the implementation of Value at Risk which is a risk measure used to access the riskiness of an asset based on loss. We implemented this measure for three different stocks. We then compared the number of violations for each VAR estimate based on actual return to access the validity of this measure.
+
+Following, we implement big data techniques to deal with high dimensional data in the financial world. For stock portfolios, we compared the effectiveness of Fama-French 3 Factors and Principle Component Factors in explaining return variations within the portfolios. We also ran Principal Component analysis for treasury bond returns to find key factors explaining bond yields and support these factors with economic intuition.
 
 ## Q1: Implementing Value at Risk (VaR) in R
 
@@ -52,7 +52,7 @@ data <- data %>% select(DATE, MSFT, INTC, JPM)
 data[c("MSFT","INTC","JPM")] <- lapply(data[c("MSFT","INTC","JPM")], function(vector) log(1+vector)) %>% as.data.frame()
 ```
 
-**Estimate three volatility time series for each of these three stocks by either using a MA (10 weeks) or an EWMA (**$\lambda = 0.94$ and $\sigma_{0}^2=\frac{1}{T}\sum^{T}_{t=1}\sigma_{t}^2$, where T is number of observations of daily returns in your sample) model.
+**Estimate three volatility time series for each of these three stocks by either using a MA (10 weeks) or an EWMA ($\lambda = 0.94$ and $\sigma_{0}^2=\frac{1}{T}\sum^{T}_{t=1}\sigma_{t}^2$, where T is number of observations of daily returns in your sample) model.**
 
 ```{r}
 # Parameters for MA
@@ -93,7 +93,7 @@ for (i in 2:nrow(data)) {
 
 $$VaR_{95\%,t} = \bar{r} - \Phi^{-1}(0.05) \times \sigma_{t}$$
 
-**where** $\bar{r}$ is the mean return (i.e., the average return of the return series of interest up to time $t$), $\Phi^{-1}$ is the inverse of the standard normal cumulative density function and, hence, $\Phi^{-1}(0.05) = 1.65$ (the z score!). Moreover, $\sigma_{t}$ is your estimated volatility at time $t$.
+**where $\bar{r}$ is the mean return (i.e., the average return of the return series of interest up to time $t$), $\Phi^{-1}$ is the inverse of the standard normal cumulative density function and, hence, $\Phi^{-1}(0.05) = 1.65$ (the z score!). Moreover, $\sigma_{t}$ is your estimated volatility at time $t$.**
 
 ```{r}
 # Parameters for VaR calculations

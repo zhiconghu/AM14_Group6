@@ -173,11 +173,10 @@ pre code {
 
 <div id="assignment-4-measuring-financial-risk-and-big-data" class="section level1">
 <h1>Assignment 4: Measuring Financial Risk and Big Data</h1>
-<div id="am14-empirical-finance---study-group-6" class="section level2">
-<h2>AM14 Empirical Finance - Study Group 6</h2>
-</div>
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
+<p>In this assignment, we aim to understand the financial risk in the market. We began the assignment with the implementation of Value at Risk which is a risk measure used to access the riskiness of an asset based on loss. We implemented this measure for three different stocks. We then compared the number of violations for each VAR estimate based on actual return to access the validity of this measure.</p>
+<p>Following, we implement big data techniques to deal with high dimensional data in the financial world. For stock portfolios, we compared the effectiveness of Fama-French 3 Factors and Principle Component Factors in explaining return variations within the portfolios. We also ran Principal Component analysis for treasury bond returns to find key factors explaining bond yields and support these factors with economic intuition.</p>
 </div>
 <div id="q1-implementing-value-at-risk-var-in-r" class="section level2">
 <h2>Q1: Implementing Value at Risk (VaR) in R</h2>
@@ -197,7 +196,7 @@ data &lt;- data %&gt;% select(DATE, MSFT, INTC, JPM)
 
 # Transform to log returns
 data[c(&quot;MSFT&quot;,&quot;INTC&quot;,&quot;JPM&quot;)] &lt;- lapply(data[c(&quot;MSFT&quot;,&quot;INTC&quot;,&quot;JPM&quot;)], function(vector) log(1+vector)) %&gt;% as.data.frame()</code></pre>
-<p><strong>Estimate three volatility time series for each of these three stocks by either using a MA (10 weeks) or an EWMA (</strong><span class="math inline">\(\lambda = 0.94\)</span> and <span class="math inline">\(\sigma_{0}^2=\frac{1}{T}\sum^{T}_{t=1}\sigma_{t}^2\)</span>, where T is number of observations of daily returns in your sample) model.</p>
+<p><strong>Estimate three volatility time series for each of these three stocks by either using a MA (10 weeks) or an EWMA (<span class="math inline">\(\lambda = 0.94\)</span> and <span class="math inline">\(\sigma_{0}^2=\frac{1}{T}\sum^{T}_{t=1}\sigma_{t}^2\)</span>, where T is number of observations of daily returns in your sample) model.</strong></p>
 <pre class="r"><code># Parameters for MA
 window_length &lt;- 50
 
@@ -232,7 +231,7 @@ for (i in 2:nrow(data)) {
 }</code></pre>
 <p><strong>Based on these six time series (two volatility time series for each of the three stocks) calculate the daily one day Value-at-Risk (VaR) 95% assuming normality. That is, you should use the estimated volatility time series together with the following formula for conditional VaR assuming normality</strong></p>
 <p><span class="math display">\[VaR_{95\%,t} = \bar{r} - \Phi^{-1}(0.05) \times \sigma_{t}\]</span></p>
-<p><strong>where</strong> <span class="math inline">\(\bar{r}\)</span> is the mean return (i.e., the average return of the return series of interest up to time <span class="math inline">\(t\)</span>), <span class="math inline">\(\Phi^{-1}\)</span> is the inverse of the standard normal cumulative density function and, hence, <span class="math inline">\(\Phi^{-1}(0.05) = 1.65\)</span> (the z score!). Moreover, <span class="math inline">\(\sigma_{t}\)</span> is your estimated volatility at time <span class="math inline">\(t\)</span>.</p>
+<p><strong>where <span class="math inline">\(\bar{r}\)</span> is the mean return (i.e., the average return of the return series of interest up to time <span class="math inline">\(t\)</span>), <span class="math inline">\(\Phi^{-1}\)</span> is the inverse of the standard normal cumulative density function and, hence, <span class="math inline">\(\Phi^{-1}(0.05) = 1.65\)</span> (the z score!). Moreover, <span class="math inline">\(\sigma_{t}\)</span> is your estimated volatility at time <span class="math inline">\(t\)</span>.</strong></p>
 <pre class="r"><code># Parameters for VaR calculations
 phi &lt;- 1.65
 
