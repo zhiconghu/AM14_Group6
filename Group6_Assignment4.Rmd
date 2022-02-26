@@ -28,6 +28,8 @@ library(cowplot)
 
 ## Introduction
 
+**In this assignment, we aim to understand the financial risk in the market. We began the assignment with the implementation of Value at Risk which is a used to measure the riskiness in the market across the daily stock returns of three different stocks.We utilize the moving average and exponentially weighted moving average to build three volatility time series and used the six volatility time series to calculate the daily one day VAR. We also compared the number of violations for each VAR estimate. We ran Principal Component analysis and regressions to identify the factors affecting return variations across different portfolios and treasury bond returns. Finally, we looked at the implementation of various shrinkage methodologies. 
+
 ## Q1: Implementing Value at Risk (VaR) in R
 
 **Pick three stocks from the daily stock returns data set (PS1 Daily.xlsx) and transform these simple returns to log returns.**
