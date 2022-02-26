@@ -26,7 +26,6 @@ library(kableExtra)
 
 ## Introduction
 
-
 ## Q1: Implementing Value at Risk (VaR) in R
 
 **Pick three stocks from the daily stock returns data set (PS1 Daily.xlsx) and transform these simple returns to log returns.**
@@ -49,7 +48,7 @@ data <- data %>% select(DATE, MSFT, INTC, JPM)
 data[c("MSFT","INTC","JPM")] <- lapply(data[c("MSFT","INTC","JPM")], function(vector) log(1+vector)) %>% as.data.frame()
 ```
 
-**Estimate three volatility time series for each of these three stocks by either using a MA (10 weeks) or an EWMA ($\lambda = 0.94$ and $\sigma_{0}^2=\frac{1}{T}\sum^{T}_{t=1}\sigma_{t}^2$, where T is number of observations of daily returns in your sample) model.**
+**Estimate three volatility time series for each of these three stocks by either using a MA (10 weeks) or an EWMA (**$\lambda = 0.94$ and $\sigma_{0}^2=\frac{1}{T}\sum^{T}_{t=1}\sigma_{t}^2$, where T is number of observations of daily returns in your sample) model.
 
 ```{r}
 # Parameters for MA
@@ -90,7 +89,7 @@ for (i in 2:nrow(data)) {
 
 $$VaR_{95\%,t} = \bar{r} - \Phi^{-1}(0.05) \times \sigma_{t}$$
 
-**where $\bar{r}$ is the mean return (i.e., the average return of the return series of interest up to time $t$), $\Phi^{-1}$ is the inverse of the standard normal cumulative density function and, hence, $\Phi^{-1}(0.05) = 1.65$ (the z score!). Moreover, $\sigma_{t}$ is your estimated volatility at time $t$.**
+**where** $\bar{r}$ is the mean return (i.e., the average return of the return series of interest up to time $t$), $\Phi^{-1}$ is the inverse of the standard normal cumulative density function and, hence, $\Phi^{-1}(0.05) = 1.65$ (the z score!). Moreover, $\sigma_{t}$ is your estimated volatility at time $t$.
 
 ```{r}
 # Parameters for VaR calculations
@@ -126,7 +125,7 @@ data[1, "INTC_EWMA_VaR"] <- data[1, "INTC"] - sqrt(phi*data[1, "INTC_EWMA"])
 data[1, "JPM_EWMA_VaR"] <- data[1, "JPM"] - sqrt(phi*data[1, "JPM_EWMA"])
 ```
 
-**In a last step, you are supposed to ”backtest” your VaR estimates. That is, for each stock you now have three VaR series as well as the realized returns. With this data, count for each VaR estimate separately the number of violations. In other words, count the negative realized market returns that are more extreme than the VaR on this given day. For example, a violation of VaR occurs on a day when the realized returns is -9% and the VaR is -8%. How many violations would you expect if your VaR estimates were to be accurate (i.e., true)? How many violations do you observe? What do you conclude?**
+**In a last step, you are supposed to "backtest" your VaR estimates. That is, for each stock you now have three VaR series as well as the realized returns. With this data, count for each VaR estimate separately the number of violations. In other words, count the negative realized market returns that are more extreme than the VaR on this given day. For example, a violation of VaR occurs on a day when the realized returns is -9% and the VaR is -8%. How many violations would you expect if your VaR estimates were to be accurate (i.e., true)? How many violations do you observe? What do you conclude?**
 
 ```{r}
 # Mutate violation column
@@ -157,15 +156,15 @@ data.frame(t(violations)) %>%
   pivot_wider(names_from = "Type", values_from = "Percent")
 ```
 
-We can see that the percentage of violation is much higher than 5% for every stock, for both method of calculating volatility, 10 Week MA and EWMA. This suggest that the log returns of stocks are not normally distribution but instead has very heavy fat tails. Therefore, our assumption of normally distribution log returns and using Z-score for calculating VaR is invalid and results in higher than expected for number of violations. 
+We can see that the percentage of violation is much higher than 5% for every stock, for both method of calculating volatility, 10 Week MA and EWMA. This suggest that the log returns of stocks are not normally distribution but instead has very heavy fat tails. Therefore, our assumption of normally distribution log returns and using Z-score for calculating VaR is invalid and results in higher than expected for number of violations.
 
 ## Q2: Portfolio Data Loading
 
-**Go to Kenneth French’s webpage https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data library.html and download the 10 portfolios formed on operating profitability, investment, dividend yield, and momentum and the 49 industry portfolios at the monthly frequency. In addition, also download the Fama/French 3 factors at the monthly frequency.**
+**Go to Kenneth French's webpage <https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data> library.html and download the 10 portfolios formed on operating profitability, investment, dividend yield, and momentum and the 49 industry portfolios at the monthly frequency. In addition, also download the Fama/French 3 factors at the monthly frequency.**
 
 ```{r message=FALSE, warning=FALSE}
 OP_portfolios <- read_csv(here("Data", "Portfolios_Formed_on_OP.CSV"), skip = 24) %>% 
-  rename(Date = `...1`)
+  rename(Date = `...1`) # change to X1 if there is an error (same for the following data)
 OP_portfolios <- OP_portfolios[1:(which(is.na(as.numeric(OP_portfolios$Date)))[1]-1),]
 
 I_portfolios <- read_csv(here("Data", "Portfolios_Formed_on_INV.CSV"), skip = 17) %>% 
@@ -220,7 +219,8 @@ I49_portfolios$Paper[I49_portfolios$Paper < -99] <- NA
 
 **Run a principal component on the combined excess returns of the 10 portfolios formed on operating profitability, investment, dividend yield, and momentum and the 49 industry portfolios (hint: use the prcomp command discussed in lecture 5). How many components/factors are needed to explain 95% of the return variation?**
 
-```{r}
+```{r pca, message = FALSE, warning=FALSE}
+# joining data
 all_portfolios <- OP_portfolios %>% 
   inner_join(I_portfolios, by = "Date", suffix = c("_OP", "_I")) %>% 
   inner_join(DY_portfolios, by = "Date", suffix = c("", "_DY")) %>% 
@@ -231,11 +231,14 @@ all_portfolios <- OP_portfolios %>%
   select(-risk_free) %>% 
   drop_na()
 
+# creating pca object with prcomp()
 pca <- prcomp(all_portfolios %>% select(-Date), scale = T, center = T)
+
+# summary of results
 summary(pca)
 ```
 
-By looking at the cumulative proportion of our principal components, we can see that we need 36 components to explain 95% of the return variations.
+From the cumulative proportion of our principal components in the summary results above, we can see that we need 36 components to explain 95% of the return variations.
 
 ## Q4: Regression on Factors
 
@@ -245,22 +248,26 @@ $$r_{i,t} − r_{f,t} = \alpha_i + \beta_i(r_{MKT,t} − r_{f,t}) + \gamma_ir_{S
 
 What is the average and median regression adjusted $R^2$? What is the standard deviation of adjusted $R^2$?
 
-```{r}
+```{r regresion on fama-french factors, message = FALSE, warning=FALSE}
+# create empty list for results
 factors_r2_vector <- c()
+# regression
 for (i in 2:(length(all_portfolios))){
   temp_df <- all_portfolios[,c(1,i)] %>% inner_join(factors %>% select(-RF), by = "Date") %>% select(-Date)
   temp_model <- lm(temp_df)
   factors_r2_vector <- append(factors_r2_vector, summary(temp_model)$adj.r.squared)
 }
-
+# printing results
 cat("The average adjusted R-squared is", mean(factors_r2_vector),
     "\nThe median adjusted R-squared is", median(factors_r2_vector),
     "\nThe standard deviation of adjusted R-squared is", sd(factors_r2_vector))
 ```
 
+The average adjusted R-squared is 0.7573 and median adjusted R-squared is 0.8272. The standard deviation of R-squared is 0.1875.
+
 ## Q5: Regression on Principal Components
 
-Now, run the following regressions for the 10 portfolios formed on operating profitability, investment, dividend yield, and momentum and the 49 industry portfolios and save all regression adjusted $R^2$: 
+Now, run the following regressions for the 10 portfolios formed on operating profitability, investment, dividend yield, and momentum and the 49 industry portfolios and save all regression adjusted $R^2$:
 
 $$r_{i,t} − r_{f,t} = \alpha_i + \beta_ir_{PC1,t} + \gamma_ir_{PC2,t} + \delta_ir_{PC3,t} + \epsilon_{i,t}$$
 
@@ -268,31 +275,26 @@ $$r_{i,t} − r_{f,t} = \alpha_i + \beta_ir_{PC1,t} + \gamma_ir_{PC2,t} + \delta
 
 What is the average and median regression adjusted $R^2$? What is the standard deviation of adjusted $R^2$? Compare and discuss your results with the ones from above!
 
-```{r}
+```{r regression on PC, message=FALSE, warning=FALSE}
+# putting first 3 principle components into data frame
 pc_df <- data.frame(Date = all_portfolios$Date, PC1 = pca$x[,1], PC2 = pca$x[,2], PC3 = pca$x[,3])
 
+# creating empty list for results
 pc_r2_vector <- c()
+# regression
 for (i in 2:(length(all_portfolios))){
   temp_df <- all_portfolios[,c(1,i)] %>% inner_join(pc_df, by = "Date") %>% select(-Date)
   temp_model <- lm(temp_df)
   pc_r2_vector <- append(pc_r2_vector, summary(temp_model)$adj.r.squared)
 }
-
+# printing results
 cat("The average adjusted R-squared is", mean(pc_r2_vector),
     "\nThe median adjusted R-squared is", median(pc_r2_vector),
     "\nThe standard deviation of adjusted R-squared is", sd(pc_r2_vector))
 ```
 
-* Higher average R-squared using PC as factors than factors from Fama-French factors
-
-* Higher median R-squared using PC as factors than factors from Fama-French factors
-
-* Lower standard deviation of R-squared using PC as factors than factors from Fama-French factors
+Using first three principle components as factors, the average adjusted R-squared is 0.7907 and median adjusted R-squared is 0.8662, which are both higher than using Fama-French factors. The standard deviation of R-squared is lower than using Fama-French factors. This means that principle components are better predictors for excess return since they account for more variation in excess return.
 
 ## Q6: Limitations of Principal Component Factors
 
-* Not Interpretable
-
-* Optimize within our dataset but might not work for the future
-
-
+Despite the better performance of the PC regression model above, principle components have limitations in that they are less intuitive and not interpretable since they don't have an exact definition, whereas the Fama-French factors can be understood easily. Another major limitation is that it is optimized based on our current data set, but may not perform as well in the future.
