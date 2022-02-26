@@ -48,7 +48,7 @@ data <- data %>% select(DATE, MSFT, INTC, JPM)
 data[c("MSFT","INTC","JPM")] <- lapply(data[c("MSFT","INTC","JPM")], function(vector) log(1+vector)) %>% as.data.frame()
 ```
 
-**Estimate three volatility time series for each of these three stocks by either using a MA (10 weeks) or an EWMA (**$\lambda = 0.94$ and $\sigma_{0}^2=\frac{1}{T}\sum^{T}_{t=1}\sigma_{t}^2$, where T is number of observations of daily returns in your sample) model.
+**Estimate three volatility time series for each of these three stocks by either using a MA (10 weeks) or an EWMA ($\lambda = 0.94$ and $\sigma_{0}^2=\frac{1}{T}\sum^{T}_{t=1}\sigma_{t}^2$, where T is number of observations of daily returns in your sample) model.**
 
 ```{r}
 # Parameters for MA
@@ -89,7 +89,7 @@ for (i in 2:nrow(data)) {
 
 $$VaR_{95\%,t} = \bar{r} - \Phi^{-1}(0.05) \times \sigma_{t}$$
 
-**where** $\bar{r}$ is the mean return (i.e., the average return of the return series of interest up to time $t$), $\Phi^{-1}$ is the inverse of the standard normal cumulative density function and, hence, $\Phi^{-1}(0.05) = 1.65$ (the z score!). Moreover, $\sigma_{t}$ is your estimated volatility at time $t$.
+**where $\bar{r}$ is the mean return (i.e., the average return of the return series of interest up to time $t$), $\Phi^{-1}$ is the inverse of the standard normal cumulative density function and, hence, $\Phi^{-1}(0.05) = 1.65$ (the z score!). Moreover, $\sigma_{t}$ is your estimated volatility at time $t$.**
 
 ```{r}
 # Parameters for VaR calculations
@@ -242,11 +242,11 @@ From the cumulative proportion of our principal components in the summary result
 
 ## Q4: Regression on Factors
 
-Run the following regressions for the 10 portfolios formed on operating profitability, investment, dividend yield, and momentum and the 49 industry portfolios and save all regression adjusted $R^2$:
+**Run the following regressions for the 10 portfolios formed on operating profitability, investment, dividend yield, and momentum and the 49 industry portfolios and save all regression adjusted $R^2$:**
 
 $$r_{i,t} − r_{f,t} = \alpha_i + \beta_i(r_{MKT,t} − r_{f,t}) + \gamma_ir_{SMB,t} + \delta_ir_{HML,t} + \epsilon_{i,t}$$
 
-What is the average and median regression adjusted $R^2$? What is the standard deviation of adjusted $R^2$?
+**What is the average and median regression adjusted $R^2$? What is the standard deviation of adjusted $R^2$?**
 
 ```{r regresion on fama-french factors, message = FALSE, warning=FALSE}
 # create empty list for results
@@ -267,13 +267,13 @@ The average adjusted R-squared is 0.7573 and median adjusted R-squared is 0.8272
 
 ## Q5: Regression on Principal Components
 
-Now, run the following regressions for the 10 portfolios formed on operating profitability, investment, dividend yield, and momentum and the 49 industry portfolios and save all regression adjusted $R^2$:
+**Now, run the following regressions for the 10 portfolios formed on operating profitability, investment, dividend yield, and momentum and the 49 industry portfolios and save all regression adjusted $R^2$:**
 
 $$r_{i,t} − r_{f,t} = \alpha_i + \beta_ir_{PC1,t} + \gamma_ir_{PC2,t} + \delta_ir_{PC3,t} + \epsilon_{i,t}$$
 
-(hint: $r_{PC1,t}$, $r_{PC2,t}$, $r_{PC3,t}$ are simply the first three principal components. These components are returns themselves as the principal components of excess returns are simply linear combinations (i.e., portfolios) thereof, i.e., excess returns. Also note that you can call these first three principal components as follows in R: pca\$x[,1], pca\$x[,2], and pca\$x[,3].)
+**(hint: $r_{PC1,t}$, $r_{PC2,t}$, $r_{PC3,t}$ are simply the first three principal components. These components are returns themselves as the principal components of excess returns are simply linear combinations (i.e., portfolios) thereof, i.e., excess returns. Also note that you can call these first three principal components as follows in R: pca\$x[,1], pca\$x[,2], and pca\$x[,3].)**
 
-What is the average and median regression adjusted $R^2$? What is the standard deviation of adjusted $R^2$? Compare and discuss your results with the ones from above!
+**What is the average and median regression adjusted $R^2$? What is the standard deviation of adjusted $R^2$? Compare and discuss your results with the ones from above!**
 
 ```{r regression on PC, message=FALSE, warning=FALSE}
 # putting first 3 principle components into data frame
