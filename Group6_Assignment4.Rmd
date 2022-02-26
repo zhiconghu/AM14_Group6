@@ -1,6 +1,6 @@
 ---
 title: "Group6_Assignment4"
-author: "Zhicong Hu"
+author: "Emma Flutsch, Roman Vazquez Lorenzo, Sarah Wu, Tanisha Yadav, Zhicong Hu"
 date: "23/02/2022"
 output: html_document
 ---
@@ -20,7 +20,6 @@ library(moments)
 library(kableExtra)
 library(janitor)
 library(cowplot)
-library(corrplot)
 ```
 
 # Assignment 4: Measuring Financial Risk and Big Data
