@@ -18,6 +18,9 @@ library(ggplot2)
 library(lubridate)
 library(moments)
 library(kableExtra)
+library(janitor)
+library(cowplot)
+library(corrplot)
 ```
 
 # Assignment 4: Measuring Financial Risk and Big Data
@@ -332,13 +335,13 @@ As shown above, using PCs as factors is able to explain more return variations f
 
 1.  Principle Component factors are not interpretable as they are merely a linear combinations of returns of each date in our dataset. On the other hand, Fama-French 3 factors are very interpretable as they are the returns of long-short portfolios built based on stock characteristics.
 
-2.  Principle Component factor are not supported by economic intuition while Fama-French 3 factors is much more explainable due to its nature of being interpretable.
+2.  Principle Component factor are not supported by economic intuition while Fama-French 3 factors is much more explainable due to its nature of being interpretable. Therefore, PC factors are unable to answer questions like what economic forces cause prices to move.
 
 3.  Since our Principle Components are built within our dataset, it is fitted to our current dataset which might not be representive of the future. Therefore, further out-of-sample testing might be required.
 
-## Q7: Treasury yield data
+## Q7: Treasury Yield Data
 
-**Load data containing daily yield curve data for the United States between July 2 1981 and January 31 2020**
+**Go to CANVAS and download the data file PS4 Daily.xlsx. This file contains daily yield curve data for the United States between July 2 1981 and January 31 2020. In particular, you are given spot rates for 1-year, 2-years, ..., 20-years.**
 
 ```{r load_PS4_daily, warning=FALSE, message=FALSE}
 #Load data and clean
@@ -409,60 +412,91 @@ pca_variance <- pca_importance[2,] %>%
     names_prefix = "PC",
     values_to = "Proportion of Variance") 
 
-# Plot proportion of variance
-pca_variance %>% ggplot(aes(fct_reorder(PC, -`Proportion of Variance`), `Proportion of Variance`)) +
-  theme_bw() +
-  geom_col(color="black", fill = "aquamarine")
+pca_variance[1:5,]
 
-  
+# Plot proportion of variance
+pca_variance %>% 
+  ggplot(aes(fct_reorder(PC, -`Proportion of Variance`), `Proportion of Variance`)) +
+  theme_bw() +
+  geom_col(color="black", fill = "aquamarine") 
 ```
 
-From the plot we can see that 2-3 components are enough to explain the majority of variations, with PC1 explaining 98.38%, PC2 01.53% and PC3 0.65%.
+From the plot we can see that 2-3 components are enough to explain the majority of variations, with PC1 explaining 98.38%, PC2 1.53% and PC3 0.65%.
 
 **Extract the first three components and plot them in a time series plot**
 
 ```{r 8.3, warning=FALSE, message=FALSE}
-time = c(1:20) # time periods
-rotation <- data.frame(pca$rotation) %>% 
-  mutate(time = 1:20, .before = PC1)
-```
-
-```{r 8.4, warning=FALSE, message=FALSE}
-ggplot(rotation, aes(x=time)) + 
-
-  geom_path(aes(y = PC1), color = "darkred") + 
-  geom_point(aes(y = PC1),shape=21, color="darkred", fill="darkred", size=1.5) +
-  geom_path(aes(y = PC2), color="steelblue") +
-  geom_point(aes(y = PC2), shape=21, color="steelblue", fill="steelblue", size=1.5) +
-  geom_path(aes(y = PC3), color="darkgreen") +
-  geom_point(aes(y = PC3), shape=21, color="darkgreen", fill="darkgreen", size=1.5) +
-  
-  xlab("Spot rate time periods (years)")+
-  ylab("Principal component ")+
-  labs(title = "The first three eigenvectors for changes in the treasury yields.", subtitle = "Time series plot of first three principal components. PC1 in red, PC2 in blue, PC3 in red.")+
+ggplot(pca$x %>% as.data.frame %>% select(PC1, PC2, PC3) %>% cbind(Date = PS4_daily$date), aes(x = Date)) + 
+  geom_path(aes(y = -PC1), color = "darkred") + 
+  geom_point(aes(y = -PC1),shape=21, color="darkred", fill="darkred", size=0.05) +
+  geom_path(aes(y = -PC2), color="steelblue") +
+  geom_point(aes(y = -PC2), shape=21, color="steelblue", fill="steelblue", size=0.05) +
+  geom_path(aes(y = -PC3), color="darkgreen") +
+  geom_point(aes(y = -PC3), shape=21, color="darkgreen", fill="darkgreen", size=0.05) +
+  xlab("Date")+
+  ylab("")+
+  labs(title = "Time series plot of first three principal components", 
+       subtitle = "PC1 in red, PC2 in blue, PC3 in red")+
   theme_bw() 
-
 ```
 
-## Q9: Correlation between yield and principal components
+## Q9: Correlation between Yield and Principal Components
 
 **Calculate the correlation between the first component and the 3-year yield and the second component and the difference between the 10-year and the 1-year yield. What is the economic intuition for these components?**
 
 ```{r 9.1, warning=FALSE, message=FALSE}
 # Prepare data
 # first component data
-PC1 <- pca$x[,1]
+PC1 <- -pca$x[,1]
 # 3-year yield
 three_yield <- PS4_daily[1:9626,4]
 # second component data
-PC2 <- pca$x[,2]
+PC2 <- -pca$x[,2]
 # difference between 10-year and 1-year yield
 diff_yield <- PS4_daily[1:9626,11]-PS4_daily[1:9626,2]
+
+cat("The correlation between first component and 3-year yield is", cor(PC1, three_yield),
+    "\nThe correlation between second component and the difference between 10-year and 1-year yield is", cor(PC2, diff_yield))
 ```
+
+As we observe, the correlation between first component (PC1) and 3-year yield is extremely high. This is because the economic intuition of PC1 is that it represents the general return of all treasury bonds, that is the "level" of bond returns. It captures how the general trend of all treasury bond yields change over time.
+
+On the other hand, the correlation between second component (PC2) and the difference between 10-year bond yield and 1-year bond yield is extremely high as well. This is because the PC2 captures the difference in yields between bonds of different time to maturity, that is the "slope" of bond returns. It captures how time to maturity of treasury bonds affects the return.
+
+Therefore, PC1 and PC2 together is able to explain large amount of return variation between our treasury bond returns, up to 99.91%.
+
+Following, we will show with evidence that our suggested economic intuition of these PCs are accurate.
+
+```{r}
+cor(data.frame(PC1 = PC1, PS4_daily[1:9626,4], PS4_daily[1:9626,6],  PS4_daily[1:9626,11], PS4_daily[1:9626,16]))[1,]
+```
+
+By our suggest economic intuition of PC1, since PC1 explains the general trend of all bond returns, PC1 should be highly correlated with all bonds yields of different time to maturity. Looking at the correlation, we can see that this is true.
+
+```{r}
+cor(data.frame(PC2 = PC2, diff_one_twenty = pull(PS4_daily[1:9626,21]-PS4_daily[1:9626,2]), 
+               diff_five_fiften = pull(PS4_daily[1:9626,16]-PS4_daily[1:9626,6]), diff_nine_ten = pull(PS4_daily[1:9626,11]-PS4_daily[1:9626,10])))[1,]
+```
+
+By our suggest economic intuition of PC2, since PC2 explains the difference in bond yield for different time to maturity, PC2 should be highly correlated with differences in the bond yield for bonds of different time to maturity. Looking at the correlation we display above, we can see that this is also true.
 
 ```{r 9.2, warning=FALSE, message=FALSE}
-cor(PC1, three_yield)
-cor(PC2,diff_yield)
+time = c(1:20) # time periods
+rotation <- data.frame(pca$rotation) %>% 
+  mutate(time = 1:20, .before = PC1)
+
+ggplot(rotation, aes(x=time)) + 
+  geom_path(aes(y = -PC1), color = "darkred") + 
+  geom_point(aes(y = -PC1),shape=21, color="darkred", fill="darkred", size=1.5) +
+  geom_path(aes(y = -PC2), color="steelblue") +
+  geom_point(aes(y = -PC2), shape=21, color="steelblue", fill="steelblue", size=1.5) +
+  xlab("Spot rate time periods (years)")+
+  ylab("Principal component ")+
+  labs(title = "The first two eigenvectors for changes in the treasury yields.", 
+       subtitle = "Time series plot of first two principal components. PC1 in red, PC2 in blue.")+
+  theme_bw() 
 ```
 
-PCA is a useful statistical method to summarize information but PCA cannot answer the important question of what economic forces cause prices to move. As such, correlations
+We also plotted the eigenvectors for our two PCs according to its components of each treasury bond with different time to maturity. We can see that this plot agrees with our suggest economic intuition as well. Our PC1 remains the same for all time to maturity while our PC2 increases with time to maturity. We can also see that PC2 touches the x-axis around 7-8 years time to maturity, therefore we will expect the correlation of PC1 to be most correlated with the returns of 7-8 year treasury bond portfolios as the component of PC2 is negligible.
+
+
