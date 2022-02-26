@@ -164,15 +164,18 @@ We can see that the percentage of violation is much higher than 5% for every sto
 
 ```{r message=FALSE, warning=FALSE}
 OP_portfolios <- read_csv(here("Data", "Portfolios_Formed_on_OP.CSV"), skip = 24) %>% 
-  rename(Date = `...1`) # change to X1 if there is an error (same for the following data)
+  rename(Date = `...1`) %>% # change to X1 if there is an error (same for the following data)
+  select(Date, `Lo 10`, `Dec 2`, `Dec 3`, `Dec 4`, `Dec 5`, `Dec 6`, `Dec 7`, `Dec 8`, `Dec 9`, `Hi 10`)
 OP_portfolios <- OP_portfolios[1:(which(is.na(as.numeric(OP_portfolios$Date)))[1]-1),]
 
 I_portfolios <- read_csv(here("Data", "Portfolios_Formed_on_INV.CSV"), skip = 17) %>% 
-  rename(Date = `...1`)
+  rename(Date = `...1`) %>%
+  select(Date, `Lo 10`, `Dec 2`, `Dec 3`, `Dec 4`, `Dec 5`, `Dec 6`, `Dec 7`, `Dec 8`, `Dec 9`, `Hi 10`)
 I_portfolios <- I_portfolios[1:(which(is.na(as.numeric(I_portfolios$Date)))[1]-1),]
 
 DY_portfolios <- read_csv(here("Data", "Portfolios_Formed_on_D-P.CSV"), skip = 19) %>% 
-  rename(Date = `...1`)
+  rename(Date = `...1`) %>%
+  select(Date, `Lo 10`, `Dec 2`, `Dec 3`, `Dec 4`, `Dec 5`, `Dec 6`, `Dec 7`, `Dec 8`, `Dec 9`, `Hi 10`)
 DY_portfolios <- DY_portfolios[1:(which(is.na(as.numeric(DY_portfolios$Date)))[1]-1),]
 
 M_portfolios <- read_csv(here("Data", "10_Portfolios_Prior_12_2.CSV"), skip = 10) %>% 
@@ -238,7 +241,7 @@ pca <- prcomp(all_portfolios %>% select(-Date), scale = T, center = T)
 summary(pca)
 ```
 
-From the cumulative proportion of our principal components in the summary results above, we can see that we need 36 components to explain 95% of the return variations.
+From the cumulative proportion of our principal components in the summary results above, we can see that we need 39 components to explain 95% of the return variations. It is important to notice that the PC1 is able to explain close to 70% of the return variations, and the first 6 PCs is able to explain more than 80% of the return variations. Since we are using vastly different portfolios that should have vastly different stocks in them, our PCs will be a good estimate for factors that are applicable for the entire market.
 
 ## Q4: Regression on Factors
 
@@ -250,20 +253,34 @@ $$r_{i,t} − r_{f,t} = \alpha_i + \beta_i(r_{MKT,t} − r_{f,t}) + \gamma_ir_{S
 
 ```{r regresion on fama-french factors, message = FALSE, warning=FALSE}
 # create empty list for results
-factors_r2_vector <- c()
+factors_r2 <- data.frame(portfolios = c(rep("OP", 10), rep("Inv", 10), rep("DY", 10), rep("Mom", 10), rep("Industry", 49)),
+                         rsquared = NA)
 # regression
 for (i in 2:(length(all_portfolios))){
   temp_df <- all_portfolios[,c(1,i)] %>% inner_join(factors %>% select(-RF), by = "Date") %>% select(-Date)
   temp_model <- lm(temp_df)
-  factors_r2_vector <- append(factors_r2_vector, summary(temp_model)$adj.r.squared)
+  factors_r2[i-1, "rsquared"] <- summary(temp_model)$adj.r.squared
 }
 # printing results
-cat("The average adjusted R-squared is", mean(factors_r2_vector),
-    "\nThe median adjusted R-squared is", median(factors_r2_vector),
-    "\nThe standard deviation of adjusted R-squared is", sd(factors_r2_vector))
+cat("The average adjusted R-squared is", mean(factors_r2$rsquared),
+    "\nThe median adjusted R-squared is", median(factors_r2$rsquared),
+    "\nThe standard deviation of adjusted R-squared is", sd(factors_r2$rsquared))
 ```
 
-The average adjusted R-squared is 0.7573 and median adjusted R-squared is 0.8272. The standard deviation of R-squared is 0.1875.
+The average adjusted R-squared for all portfolios is 0.710 and median adjusted R-squared for all portfolios is 0.751. The standard deviation of R-squared for all portfolios is 0.185. However, we will want to examine where these factors works equally well for all portfolios, or whether if there are specific portfolios that these factors fail.
+
+```{r}
+factors_r2 %>% group_by(portfolios) %>% summarise(Mean_Rsquared = mean(rsquared))
+
+ggplot(factors_r2, aes(x = rsquared, fill = portfolios)) +
+  geom_histogram(binwidth = 0.05) +
+  theme_minimal() +
+  labs(x = "R-squared",
+       y = "",
+       title = "R-squared of Regression based on 3 Factor model on different portfolios")
+```
+
+As we can see from the table and distribution of R-squared, the Fama-French three factor model is unable to explain the return variations of Industry-specific portfolios very well, with only a mean R-squared of 0.59. It does not work very well for Momentum-specific portfolios as well with a mean R-squared of 0.81.
 
 ## Q5: Regression on Principal Components
 
@@ -280,21 +297,42 @@ $$r_{i,t} − r_{f,t} = \alpha_i + \beta_ir_{PC1,t} + \gamma_ir_{PC2,t} + \delta
 pc_df <- data.frame(Date = all_portfolios$Date, PC1 = pca$x[,1], PC2 = pca$x[,2], PC3 = pca$x[,3])
 
 # creating empty list for results
-pc_r2_vector <- c()
+pc_r2 <- data.frame(portfolios = c(rep("OP", 10), rep("Inv", 10), rep("DY", 10), rep("Mom", 10), rep("Industry", 49)),
+                    rsquared = NA)
 # regression
 for (i in 2:(length(all_portfolios))){
   temp_df <- all_portfolios[,c(1,i)] %>% inner_join(pc_df, by = "Date") %>% select(-Date)
   temp_model <- lm(temp_df)
-  pc_r2_vector <- append(pc_r2_vector, summary(temp_model)$adj.r.squared)
+  pc_r2[i-1, "rsquared"] <- summary(temp_model)$adj.r.squared
 }
 # printing results
-cat("The average adjusted R-squared is", mean(pc_r2_vector),
-    "\nThe median adjusted R-squared is", median(pc_r2_vector),
-    "\nThe standard deviation of adjusted R-squared is", sd(pc_r2_vector))
+cat("The average adjusted R-squared is", mean(pc_r2$rsquared),
+    "\nThe median adjusted R-squared is", median(pc_r2$rsquared),
+    "\nThe standard deviation of adjusted R-squared is", sd(pc_r2$rsquared))
 ```
 
-Using first three principle components as factors, the average adjusted R-squared is 0.7907 and median adjusted R-squared is 0.8662, which are both higher than using Fama-French factors. The standard deviation of R-squared is lower than using Fama-French factors. This means that principle components are better predictors for excess return since they account for more variation in excess return.
+Using first three principle components as factors, the average adjusted R-squared for all portfolios is 0.750 and median adjusted R-squared for all portfolios is 0.786, which are both higher than using Fama-French factors. The standard deviation of R-squared for all portfolios is lower than using Fama-French factors. This means that principle components are better predictors for excess return since they account for more variation in excess return. However, we will want to investigate deeper if the effectiveness of these PC factors is consistent for all types of portfolios.
+
+```{r}
+pc_r2 %>% group_by(portfolios) %>% summarise(Mean_Rsquared = mean(rsquared))
+
+ggplot(pc_r2, aes(x = rsquared, fill = portfolios)) +
+  geom_histogram(binwidth = 0.05) +
+  theme_minimal() +
+  labs(x = "R-squared",
+       y = "",
+       title = "R-squared of Regression based on 3 PCs on different portfolios")
+```
+
+Comparing the regression results of Fama-French 3 factors and 3 PC factors, we can see that our 3 PC factors is able to explain return variations of Industry-specific portfolios much better, with an increase in R-squared of over 10%. Our 3 PC factors also works much better for Momentum-specific portfolios. Therefore, we can suggest that our PC factors involves some components regarding industry and momentum. However, the mean R-squared of Operating Profitability and Investment specific portfolios decreased slightly but the drop is negligible.
 
 ## Q6: Limitations of Principal Component Factors
 
-Despite the better performance of the PC regression model above, principle components have limitations in that they are less intuitive and not interpretable since they don't have an exact definition, whereas the Fama-French factors can be understood easily. Another major limitation is that it is optimized based on our current data set, but may not perform as well in the future.
+As shown above, using PCs as factors is able to explain more return variations for all types of portfolios. However, there are many limitations to PC factors:
+
+1. Principle Component factors are not interpretable as they are merely a linear combinations of returns of each date in our dataset. On the other hand, Fama-French 3 factors are very interpretable as they are the returns of long-short portfolios built based on stock characteristics.
+
+2. Principle Component factor are not supported by economic intuition while Fama-French 3 factors is much more explainable due to its nature of being interpretable.
+
+3. Since our Principle Components are built within our dataset, it is fitted to our current dataset which might not be representive of the future. Therefore, further out-of-sample testing might be required.
+
