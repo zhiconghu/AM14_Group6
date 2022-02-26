@@ -464,3 +464,5 @@ diff_yield <- PS4_daily[1:9626,11]-PS4_daily[1:9626,2]
 cor(PC1, three_yield)
 cor(PC2,diff_yield)
 ```
+
+PCA is a useful statistical method to summarize information but PCA cannot answer the important question of what economic forces cause prices to move. As such, correlations
