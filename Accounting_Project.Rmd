@@ -1,0 +1,44 @@
+---
+title: "Accounting_Project"
+author: "Sarah Wu"
+date: "10/03/2022"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(here)
+library(lubridate)
+```
+
+```{r}
+# import data
+overheads <- readxl::read_excel(here("Data","Overheads.xlsx"))
+transactions <- read.delim(here("Data","Transactions.txt"))
+# clean data
+transactions$quantity_sold<- as.numeric(transactions$quantity_sold)
+transactions$date_of_sale<-lubridate::as_date(transactions$date_of_sale, format = '%d/%m/%Y') 
+transactions <- transactions %>% 
+  mutate(across(c(list_price,cost), ~gsub("\\$", "", .) %>% as.numeric))
+head(transactions)
+
+# calculate overhead costs in 2018
+overheads %>%  pivot_longer(2:9,names_to = "region", values_to = "overheads") %>% group_by(`For the year 2018`) %>% 
+  summarise(overheads = sum(overheads)) # summing up overhead costs across all regions
+
+# calculate sales revenue
+transactions <-transactions %>% 
+  mutate(sales_revenue = list_price*quantity_sold, 
+         gross_profit = list_price*quantity_sold-cost,
+         year = year(date_of_sale))
+
+# calculate operating profits and percentage in sales
+transactions %>% group_by(year) %>% 
+  summarise(sales_revenue = sum(sales_revenue), 
+            gross_profit = sum(gross_profit)) %>% 
+  mutate(operating_profit = gross_profit-9580000) %>% # subtract non-production overhead costs
+  mutate(profit_as_percentage_of_sales = operating_profit/sales_revenue) %>% 
+  filter(year == 2018) %>% 
+  select(-gross_profit)
+```
+
