@@ -1,6 +1,6 @@
 ---
 title: "Group6_Assignment4"
-author: "Zhicong Hu"
+author: "Emma Flutsch, Roman Vazquez Lorenzo, Sarah Wu, Tanisha Yadav, Zhicong Hu"
 date: "23/02/2022"
 output: html_document
 ---
@@ -18,13 +18,17 @@ library(ggplot2)
 library(lubridate)
 library(moments)
 library(kableExtra)
+library(janitor)
+library(cowplot)
 ```
 
 # Assignment 4: Measuring Financial Risk and Big Data
 
-## AM14 Empirical Finance - Study Group 6
-
 ## Introduction
+
+In this assignment, we aim to understand the financial risk in the market. We began the assignment with the implementation of Value at Risk which is a risk measure used to access the riskiness of an asset based on loss. We implemented this measure for three different stocks. We then compared the number of violations for each VAR estimate based on actual return to access the validity of this measure.
+
+Following, we implement big data techniques to deal with high dimensional data in the financial world. For stock portfolios, we compared the effectiveness of Fama-French 3 Factors and Principle Component Factors in explaining return variations within the portfolios. We also ran Principal Component analysis for treasury bond returns to find key factors explaining bond yields and support these factors with economic intuition.
 
 ## Q1: Implementing Value at Risk (VaR) in R
 
@@ -48,7 +52,7 @@ data <- data %>% select(DATE, MSFT, INTC, JPM)
 data[c("MSFT","INTC","JPM")] <- lapply(data[c("MSFT","INTC","JPM")], function(vector) log(1+vector)) %>% as.data.frame()
 ```
 
-**Estimate three volatility time series for each of these three stocks by either using a MA (10 weeks) or an EWMA (**$\lambda = 0.94$ and $\sigma_{0}^2=\frac{1}{T}\sum^{T}_{t=1}\sigma_{t}^2$, where T is number of observations of daily returns in your sample) model.
+**Estimate three volatility time series for each of these three stocks by either using a MA (10 weeks) or an EWMA ($\lambda = 0.94$ and $\sigma_{0}^2=\frac{1}{T}\sum^{T}_{t=1}\sigma_{t}^2$, where T is number of observations of daily returns in your sample) model.**
 
 ```{r}
 # Parameters for MA
@@ -89,7 +93,7 @@ for (i in 2:nrow(data)) {
 
 $$VaR_{95\%,t} = \bar{r} - \Phi^{-1}(0.05) \times \sigma_{t}$$
 
-**where** $\bar{r}$ is the mean return (i.e., the average return of the return series of interest up to time $t$), $\Phi^{-1}$ is the inverse of the standard normal cumulative density function and, hence, $\Phi^{-1}(0.05) = 1.65$ (the z score!). Moreover, $\sigma_{t}$ is your estimated volatility at time $t$.
+**where $\bar{r}$ is the mean return (i.e., the average return of the return series of interest up to time $t$), $\Phi^{-1}$ is the inverse of the standard normal cumulative density function and, hence, $\Phi^{-1}(0.05) = 1.65$ (the z score!). Moreover, $\sigma_{t}$ is your estimated volatility at time $t$.**
 
 ```{r}
 # Parameters for VaR calculations
@@ -164,15 +168,18 @@ We can see that the percentage of violation is much higher than 5% for every sto
 
 ```{r message=FALSE, warning=FALSE}
 OP_portfolios <- read_csv(here("Data", "Portfolios_Formed_on_OP.CSV"), skip = 24) %>% 
-  rename(Date = `...1`) # change to X1 if there is an error (same for the following data)
+  rename(Date = `...1`) %>% # change to X1 if there is an error (same for the following data)
+  select(Date, `Lo 10`, `Dec 2`, `Dec 3`, `Dec 4`, `Dec 5`, `Dec 6`, `Dec 7`, `Dec 8`, `Dec 9`, `Hi 10`)
 OP_portfolios <- OP_portfolios[1:(which(is.na(as.numeric(OP_portfolios$Date)))[1]-1),]
 
 I_portfolios <- read_csv(here("Data", "Portfolios_Formed_on_INV.CSV"), skip = 17) %>% 
-  rename(Date = `...1`)
+  rename(Date = `...1`) %>%
+  select(Date, `Lo 10`, `Dec 2`, `Dec 3`, `Dec 4`, `Dec 5`, `Dec 6`, `Dec 7`, `Dec 8`, `Dec 9`, `Hi 10`)
 I_portfolios <- I_portfolios[1:(which(is.na(as.numeric(I_portfolios$Date)))[1]-1),]
 
 DY_portfolios <- read_csv(here("Data", "Portfolios_Formed_on_D-P.CSV"), skip = 19) %>% 
-  rename(Date = `...1`)
+  rename(Date = `...1`) %>%
+  select(Date, `Lo 10`, `Dec 2`, `Dec 3`, `Dec 4`, `Dec 5`, `Dec 6`, `Dec 7`, `Dec 8`, `Dec 9`, `Hi 10`)
 DY_portfolios <- DY_portfolios[1:(which(is.na(as.numeric(DY_portfolios$Date)))[1]-1),]
 
 M_portfolios <- read_csv(here("Data", "10_Portfolios_Prior_12_2.CSV"), skip = 10) %>% 
@@ -238,63 +245,261 @@ pca <- prcomp(all_portfolios %>% select(-Date), scale = T, center = T)
 summary(pca)
 ```
 
-From the cumulative proportion of our principal components in the summary results above, we can see that we need 36 components to explain 95% of the return variations.
+From the cumulative proportion of our principal components in the summary results above, we can see that we need 39 components to explain 95% of the return variations. It is important to notice that the PC1 is able to explain close to 70% of the return variations, and the first 6 PCs is able to explain more than 80% of the return variations. Since we are using vastly different portfolios that should have vastly different stocks in them, our PCs will be a good estimate for factors that are applicable for the entire market.
 
 ## Q4: Regression on Factors
 
-Run the following regressions for the 10 portfolios formed on operating profitability, investment, dividend yield, and momentum and the 49 industry portfolios and save all regression adjusted $R^2$:
+**Run the following regressions for the 10 portfolios formed on operating profitability, investment, dividend yield, and momentum and the 49 industry portfolios and save all regression adjusted** $R^2$:
 
 $$r_{i,t} − r_{f,t} = \alpha_i + \beta_i(r_{MKT,t} − r_{f,t}) + \gamma_ir_{SMB,t} + \delta_ir_{HML,t} + \epsilon_{i,t}$$
 
-What is the average and median regression adjusted $R^2$? What is the standard deviation of adjusted $R^2$?
+**What is the average and median regression adjusted $R^2$? What is the standard deviation of adjusted $R^2$?**
 
 ```{r regresion on fama-french factors, message = FALSE, warning=FALSE}
 # create empty list for results
-factors_r2_vector <- c()
+factors_r2 <- data.frame(portfolios = c(rep("OP", 10), rep("Inv", 10), rep("DY", 10), rep("Mom", 10), rep("Industry", 49)),
+                         rsquared = NA)
 # regression
 for (i in 2:(length(all_portfolios))){
   temp_df <- all_portfolios[,c(1,i)] %>% inner_join(factors %>% select(-RF), by = "Date") %>% select(-Date)
   temp_model <- lm(temp_df)
-  factors_r2_vector <- append(factors_r2_vector, summary(temp_model)$adj.r.squared)
+  factors_r2[i-1, "rsquared"] <- summary(temp_model)$adj.r.squared
 }
 # printing results
-cat("The average adjusted R-squared is", mean(factors_r2_vector),
-    "\nThe median adjusted R-squared is", median(factors_r2_vector),
-    "\nThe standard deviation of adjusted R-squared is", sd(factors_r2_vector))
+cat("The average adjusted R-squared is", mean(factors_r2$rsquared),
+    "\nThe median adjusted R-squared is", median(factors_r2$rsquared),
+    "\nThe standard deviation of adjusted R-squared is", sd(factors_r2$rsquared))
 ```
 
-The average adjusted R-squared is 0.7573 and median adjusted R-squared is 0.8272. The standard deviation of R-squared is 0.1875.
+The average adjusted R-squared for all portfolios is 0.710 and median adjusted R-squared for all portfolios is 0.751. The standard deviation of R-squared for all portfolios is 0.185. However, we will want to examine where these factors works equally well for all portfolios, or whether if there are specific portfolios that these factors fail.
+
+```{r}
+factors_r2 %>% group_by(portfolios) %>% summarise(Mean_Rsquared = mean(rsquared))
+
+ggplot(factors_r2, aes(x = rsquared, fill = portfolios)) +
+  geom_histogram(binwidth = 0.05) +
+  theme_minimal() +
+  labs(x = "R-squared",
+       y = "",
+       title = "R-squared of Regression based on 3 Factor model on different portfolios")
+```
+
+As we can see from the table and distribution of R-squared, the Fama-French three factor model is unable to explain the return variations of Industry-specific portfolios very well, with only a mean R-squared of 0.59. It does not work very well for Momentum-specific portfolios as well with a mean R-squared of 0.81.
 
 ## Q5: Regression on Principal Components
 
-Now, run the following regressions for the 10 portfolios formed on operating profitability, investment, dividend yield, and momentum and the 49 industry portfolios and save all regression adjusted $R^2$:
+**Now, run the following regressions for the 10 portfolios formed on operating profitability, investment, dividend yield, and momentum and the 49 industry portfolios and save all regression adjusted $R^2$:**
 
 $$r_{i,t} − r_{f,t} = \alpha_i + \beta_ir_{PC1,t} + \gamma_ir_{PC2,t} + \delta_ir_{PC3,t} + \epsilon_{i,t}$$
 
-(hint: $r_{PC1,t}$, $r_{PC2,t}$, $r_{PC3,t}$ are simply the first three principal components. These components are returns themselves as the principal components of excess returns are simply linear combinations (i.e., portfolios) thereof, i.e., excess returns. Also note that you can call these first three principal components as follows in R: pca\$x[,1], pca\$x[,2], and pca\$x[,3].)
+**(hint: $r_{PC1,t}$, $r_{PC2,t}$, $r_{PC3,t}$ are simply the first three principal components. These components are returns themselves as the principal components of excess returns are simply linear combinations (i.e., portfolios) thereof, i.e., excess returns. Also note that you can call these first three principal components as follows in R: pca\$x[,1], pca\$x[,2], and pca\$x[,3].)**
 
-What is the average and median regression adjusted $R^2$? What is the standard deviation of adjusted $R^2$? Compare and discuss your results with the ones from above!
+**What is the average and median regression adjusted $R^2$? What is the standard deviation of adjusted $R^2$? Compare and discuss your results with the ones from above!**
 
 ```{r regression on PC, message=FALSE, warning=FALSE}
 # putting first 3 principle components into data frame
 pc_df <- data.frame(Date = all_portfolios$Date, PC1 = pca$x[,1], PC2 = pca$x[,2], PC3 = pca$x[,3])
 
 # creating empty list for results
-pc_r2_vector <- c()
+pc_r2 <- data.frame(portfolios = c(rep("OP", 10), rep("Inv", 10), rep("DY", 10), rep("Mom", 10), rep("Industry", 49)),
+                    rsquared = NA)
 # regression
 for (i in 2:(length(all_portfolios))){
   temp_df <- all_portfolios[,c(1,i)] %>% inner_join(pc_df, by = "Date") %>% select(-Date)
   temp_model <- lm(temp_df)
-  pc_r2_vector <- append(pc_r2_vector, summary(temp_model)$adj.r.squared)
+  pc_r2[i-1, "rsquared"] <- summary(temp_model)$adj.r.squared
 }
 # printing results
-cat("The average adjusted R-squared is", mean(pc_r2_vector),
-    "\nThe median adjusted R-squared is", median(pc_r2_vector),
-    "\nThe standard deviation of adjusted R-squared is", sd(pc_r2_vector))
+cat("The average adjusted R-squared is", mean(pc_r2$rsquared),
+    "\nThe median adjusted R-squared is", median(pc_r2$rsquared),
+    "\nThe standard deviation of adjusted R-squared is", sd(pc_r2$rsquared))
 ```
 
-Using first three principle components as factors, the average adjusted R-squared is 0.7907 and median adjusted R-squared is 0.8662, which are both higher than using Fama-French factors. The standard deviation of R-squared is lower than using Fama-French factors. This means that principle components are better predictors for excess return since they account for more variation in excess return.
+Using first three principle components as factors, the average adjusted R-squared for all portfolios is 0.750 and median adjusted R-squared for all portfolios is 0.786, which are both higher than using Fama-French factors. The standard deviation of R-squared for all portfolios is lower than using Fama-French factors. This means that principle components are better predictors for excess return since they account for more variation in excess return. However, we will want to investigate deeper if the effectiveness of these PC factors is consistent for all types of portfolios.
+
+```{r}
+pc_r2 %>% group_by(portfolios) %>% summarise(Mean_Rsquared = mean(rsquared))
+
+ggplot(pc_r2, aes(x = rsquared, fill = portfolios)) +
+  geom_histogram(binwidth = 0.05) +
+  theme_minimal() +
+  labs(x = "R-squared",
+       y = "",
+       title = "R-squared of Regression based on 3 PCs on different portfolios")
+```
+
+Comparing the regression results of Fama-French 3 factors and 3 PC factors, we can see that our 3 PC factors is able to explain return variations of Industry-specific portfolios much better, with an increase in R-squared of over 10%. Our 3 PC factors also works much better for Momentum-specific portfolios. Therefore, we can suggest that our PC factors involves some components regarding industry and momentum. However, the mean R-squared of Operating Profitability and Investment specific portfolios decreased slightly but the drop is negligible.
 
 ## Q6: Limitations of Principal Component Factors
 
-Despite the better performance of the PC regression model above, principle components have limitations in that they are less intuitive and not interpretable since they don't have an exact definition, whereas the Fama-French factors can be understood easily. Another major limitation is that it is optimized based on our current data set, but may not perform as well in the future.
+**What are the problems with factor models based on principal components?**
+
+As shown above, using PCs as factors is able to explain more return variations for all types of portfolios. However, there are many limitations to PC factors:
+
+1.  Principle Component factors are not interpretable as they are merely a linear combinations of returns of each date in our dataset. On the other hand, Fama-French 3 factors are very interpretable as they are the returns of long-short portfolios built based on stock characteristics.
+
+2.  Principle Component factor are not supported by economic intuition while Fama-French 3 factors is much more explainable due to its nature of being interpretable. Therefore, PC factors are unable to answer questions like what economic forces cause prices to move.
+
+3.  Since our Principle Components are built within our dataset, it is fitted to our current dataset which might not be representive of the future. Therefore, further out-of-sample testing might be required.
+
+## Q7: Treasury Yield Data
+
+**Go to CANVAS and download the data file PS4 Daily.xlsx. This file contains daily yield curve data for the United States between July 2 1981 and January 31 2020. In particular, you are given spot rates for 1-year, 2-years, ..., 20-years.**
+
+```{r load_PS4_daily, warning=FALSE, message=FALSE}
+#Load data and clean
+PS4_daily <- read_xlsx(here("Data", "PS4_Daily.xlsx"), col_types =c("date" , replicate(20, "numeric"))) %>% 
+  filter(!SVENY01 == 'NA') %>% 
+  drop_na() %>% 
+  clean_names() 
+  # mutate(date = as_date(date)) 
+  # select(starts_with('sveny')) %>%
+  # mutate_all(c()
+
+skimr::skim(PS4_daily) # check for NAs and see dates
+```
+
+## Q8: PCA for Treasury yields
+
+```{r 8.1, warning=FALSE, message=FALSE}
+plot_sveny01 <- ggplot(PS4_daily, aes(x=date, y=sveny01)) + 
+  theme_bw()+
+  geom_line(color = "black") + 
+  xlab("Date")+
+  ylab("Expected interest (%)")+
+  labs(title = "Yield curve data (1-year spot rate)") 
+
+plot_sveny07 <- ggplot(PS4_daily, aes(x=date, y=sveny07)) + 
+  theme_bw()+
+  geom_line(color = "black") + 
+  xlab("Date")+
+  ylab("Expected interest (%)")+
+  labs(title = "Yield curve data (7-year spot rate)") 
+
+plot_sveny15 <- ggplot(PS4_daily, aes(x=date, y=sveny15)) + 
+  theme_bw()+
+  geom_line(color = "black") + 
+  xlab("Date")+
+  ylab("Expected interest (%)")+
+  labs(title = "Yield curve data (15-year spot rate)") 
+
+plot_sveny20 <- ggplot(PS4_daily, aes(x=date, y=sveny20)) + 
+  theme_bw()+
+  geom_line(color = "black") + 
+  xlab("Date")+
+  ylab("Expected interest (%)")+
+  labs(title = "Yield curve data (20-year spot rate)") 
+
+plot_grid(plot_sveny01, plot_sveny07, plot_sveny15, plot_sveny20,
+  nrow = 2,
+  align = "v"
+)
+```
+
+From the four graphs plotted above we can observe yield curve data for different yield-to-maturity rates or spot rates. Most notably, we see that the higher the time rate, the less volatility in the data, which may be explained by a reduced effect of news and macro-economic factors affecting the bond interest rates when a long period of time is considered.
+
+**How many principal components are needed to explain the majority of the variation in the yields?**
+
+```{r 8.2, warning=FALSE, message=FALSE}
+#Matrix yield data
+yields <- (as.matrix(PS4_daily[,2:21]))
+#Number of information in yield matrix
+n = dim(yields)[1]
+#run pca and get a summary
+pca = prcomp(yields)
+pca_importance <- data.frame(summary(pca)$importance) 
+pca_variance <- pca_importance[2,] %>% 
+  pivot_longer(
+    cols = starts_with("PC"),
+    names_to = "PC", 
+    names_prefix = "PC",
+    values_to = "Proportion of Variance") 
+
+pca_variance[1:5,]
+
+# Plot proportion of variance
+pca_variance %>% 
+  ggplot(aes(fct_reorder(PC, -`Proportion of Variance`), `Proportion of Variance`)) +
+  theme_bw() +
+  geom_col(color="black", fill = "aquamarine") 
+```
+
+From the plot we can see that 2-3 components are enough to explain the majority of variations, with PC1 explaining 98.38%, PC2 1.53% and PC3 0.65%.
+
+**Extract the first three components and plot them in a time series plot**
+
+```{r 8.3, warning=FALSE, message=FALSE}
+ggplot(pca$x %>% as.data.frame %>% select(PC1, PC2, PC3) %>% cbind(Date = PS4_daily$date), aes(x = Date)) + 
+  geom_path(aes(y = -PC1), color = "darkred") + 
+  geom_point(aes(y = -PC1),shape=21, color="darkred", fill="darkred", size=0.05) +
+  geom_path(aes(y = -PC2), color="steelblue") +
+  geom_point(aes(y = -PC2), shape=21, color="steelblue", fill="steelblue", size=0.05) +
+  geom_path(aes(y = -PC3), color="darkgreen") +
+  geom_point(aes(y = -PC3), shape=21, color="darkgreen", fill="darkgreen", size=0.05) +
+  xlab("Date")+
+  ylab("")+
+  labs(title = "Time series plot of first three principal components", 
+       subtitle = "PC1 in red, PC2 in blue, PC3 in red")+
+  theme_bw() 
+```
+
+## Q9: Correlation between Yield and Principal Components
+
+**Calculate the correlation between the first component and the 3-year yield and the second component and the difference between the 10-year and the 1-year yield. What is the economic intuition for these components?**
+
+```{r 9.1, warning=FALSE, message=FALSE}
+# Prepare data
+# first component data
+PC1 <- -pca$x[,1]
+# 3-year yield
+three_yield <- PS4_daily[1:9626,4]
+# second component data
+PC2 <- -pca$x[,2]
+# difference between 10-year and 1-year yield
+diff_yield <- PS4_daily[1:9626,11]-PS4_daily[1:9626,2]
+
+cat("The correlation between first component and 3-year yield is", cor(PC1, three_yield),
+    "\nThe correlation between second component and the difference between 10-year and 1-year yield is", cor(PC2, diff_yield))
+```
+
+As we observe, the correlation between first component (PC1) and 3-year yield is extremely high. This is because the economic intuition of PC1 is that it represents the general return of all treasury bonds, that is the "level" of bond returns. It captures how the general trend of all treasury bond yields change over time.
+
+On the other hand, the correlation between second component (PC2) and the difference between 10-year bond yield and 1-year bond yield is extremely high as well. This is because the PC2 captures the difference in yields between bonds of different time to maturity, that is the "slope" of bond returns. It captures how time to maturity of treasury bonds affects the return.
+
+Therefore, PC1 and PC2 together is able to explain large amount of return variation between our treasury bond returns, up to 99.91%.
+
+Following, we will show with evidence that our suggested economic intuition of these PCs are accurate.
+
+```{r}
+cor(data.frame(PC1 = PC1, PS4_daily[1:9626,4], PS4_daily[1:9626,6],  PS4_daily[1:9626,11], PS4_daily[1:9626,16]))[1,]
+```
+
+By our suggest economic intuition of PC1, since PC1 explains the general trend of all bond returns, PC1 should be highly correlated with all bonds yields of different time to maturity. Looking at the correlation, we can see that this is true.
+
+```{r}
+cor(data.frame(PC2 = PC2, diff_one_twenty = pull(PS4_daily[1:9626,21]-PS4_daily[1:9626,2]), 
+               diff_five_fiften = pull(PS4_daily[1:9626,16]-PS4_daily[1:9626,6]), diff_nine_ten = pull(PS4_daily[1:9626,11]-PS4_daily[1:9626,10])))[1,]
+```
+
+By our suggest economic intuition of PC2, since PC2 explains the difference in bond yield for different time to maturity, PC2 should be highly correlated with differences in the bond yield for bonds of different time to maturity. Looking at the correlation we display above, we can see that this is also true.
+
+```{r 9.2, warning=FALSE, message=FALSE}
+time = c(1:20) # time periods
+rotation <- data.frame(pca$rotation) %>% 
+  mutate(time = 1:20, .before = PC1)
+
+ggplot(rotation, aes(x=time)) + 
+  geom_path(aes(y = -PC1), color = "darkred") + 
+  geom_point(aes(y = -PC1),shape=21, color="darkred", fill="darkred", size=1.5) +
+  geom_path(aes(y = -PC2), color="steelblue") +
+  geom_point(aes(y = -PC2), shape=21, color="steelblue", fill="steelblue", size=1.5) +
+  xlab("Spot rate time periods (years)")+
+  ylab("Principal component ")+
+  labs(title = "The first two eigenvectors for changes in the treasury yields.", 
+       subtitle = "Time series plot of first two principal components. PC1 in red, PC2 in blue.")+
+  theme_bw() 
+```
+
+We also plotted the eigenvectors for our two PCs according to its components of each treasury bond with different time to maturity. We can see that this plot agrees with our suggest economic intuition as well. Our PC1 remains the same for all time to maturity while our PC2 increases with time to maturity. We can also see that PC2 touches the x-axis around 7-8 years time to maturity, therefore we will expect the correlation of PC1 to be most correlated with the returns of 7-8 year treasury bond portfolios as the component of PC2 is negligible.
+
+
