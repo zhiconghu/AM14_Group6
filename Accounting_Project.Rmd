@@ -8,8 +8,11 @@ output: html_document
 ```{r}
 library(tidyverse)
 library(here)
+library(janitor)
 library(lubridate)
 ```
+
+## Question 1
 
 ```{r}
 # import data
@@ -22,8 +25,10 @@ transactions <- transactions %>%
   mutate(across(c(list_price,cost), ~gsub("\\$", "", .) %>% as.numeric))
 head(transactions)
 
+overheads<-rename(overheads, category = `For the year 2018`)
+
 # calculate overhead costs in 2018
-overheads %>%  pivot_longer(2:9,names_to = "region", values_to = "overheads") %>% group_by(`For the year 2018`) %>% 
+overheads %>%  pivot_longer(2:9,names_to = "region", values_to = "overheads") %>% group_by(category) %>% 
   summarise(overheads = sum(overheads)) # summing up overhead costs across all regions
 
 # calculate sales revenue
@@ -36,9 +41,32 @@ transactions <-transactions %>%
 transactions %>% group_by(year) %>% 
   summarise(sales_revenue = sum(sales_revenue), 
             gross_profit = sum(gross_profit)) %>% 
+  filter(year == 2018) %>% 
   mutate(operating_profit = gross_profit-9580000) %>% # subtract non-production overhead costs
   mutate(profit_as_percentage_of_sales = operating_profit/sales_revenue) %>% 
-  filter(year == 2018) %>% 
   select(-gross_profit)
 ```
 
+## Question 2
+
+```{r}
+
+# calculate overhead costs in 2018
+overheads_by_region <-overheads %>%  pivot_longer(2:9,names_to = "region", values_to = "overheads") %>% 
+  pivot_wider(names_from = "category", values_from = "overheads") %>% #separate production and non-production costs in different columns
+  clean_names() %>% 
+  group_by(region) %>% 
+  summarise(production_overheads = sum(production_overheads), 
+            non_production_oerheads = sum(non_production_overheads)) %>%  #summing up overhead costs across all regions
+  mutate(year = 2018)
+overheads_by_region
+
+transactions_by_region <- transactions %>% group_by(year, region) %>% 
+  summarise(sales_revenue = sum(sales_revenue), 
+            gross_profit = sum(gross_profit)) %>% 
+  filter(year == 2018)
+transactions_by_region
+
+joined_by_region<-full_join(overheads_by_region, transactions_by_region, by = c("region", "year"))
+joined_by_region
+```
