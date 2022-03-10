@@ -28,26 +28,31 @@ head(transactions)
 overheads<-rename(overheads, category = `For the year 2018`)
 
 # calculate overhead costs in 2018
-overheads %>%  pivot_longer(2:9,names_to = "region", values_to = "overheads") %>% group_by(category) %>% 
-  summarise(overheads = sum(overheads)) # summing up overhead costs across all regions
-
-# calculate sales revenue
+overheads %>%  pivot_longer(2:9,names_to = "region", values_to = "overheads") %>% 
+  pivot_wider(names_from = "category", values_from = "overheads") %>% #separate production and non-production costs in different columns
+  clean_names() %>% 
+  summarise(production_overheads = sum(production_overheads), 
+            non_production_overheads = sum(non_production_overheads))  #summing up
+# calculate sales revenue and costs
 transactions <-transactions %>% 
   mutate(sales_revenue = list_price*quantity_sold, 
-         gross_profit = list_price*quantity_sold-cost,
+         costs = cost*quantity_sold,
          year = year(date_of_sale))
 
 # calculate operating profits and percentage in sales
-transactions %>% group_by(year) %>% 
+transactions %>% filter(year == 2018) %>% 
   summarise(sales_revenue = sum(sales_revenue), 
-            gross_profit = sum(gross_profit)) %>% 
-  filter(year == 2018) %>% 
-  mutate(operating_profit = gross_profit-9580000) %>% # subtract non-production overhead costs
-  mutate(profit_as_percentage_of_sales = operating_profit/sales_revenue) %>% 
-  select(-gross_profit)
+            costs = sum(costs)) %>% 
+  mutate(gross_profits = sales_revenue-costs-48205754) %>% 
+  mutate(operating_profit = gross_profits-9580000) %>% # subtract non-production overhead costs
+  mutate(profit_as_percentage_of_sales = operating_profit/sales_revenue)
 ```
 
 ## Question 2
+
+By calculating and plotting the operating profits of each region, we found that the Eastcoast region has the highest operating profits, as shown by the bar chart in figure 1. The West and South regions are suffering negative operating profits. By looking at figure 2, we see that the West region has a positive gross profits, which suggests that its non-production overheads must be higher than gross profits so that it brings the operating profits to a negative number.
+
+By breaking down the costs, we can see that the non-production overhead costs are relatively low when compared with the other cost categories, as shown by figure 2. The largest of costs still come from product direct and variable costs, followed by production overheads.
 
 ```{r}
 
@@ -57,16 +62,107 @@ overheads_by_region <-overheads %>%  pivot_longer(2:9,names_to = "region", value
   clean_names() %>% 
   group_by(region) %>% 
   summarise(production_overheads = sum(production_overheads), 
-            non_production_oerheads = sum(non_production_overheads)) %>%  #summing up overhead costs across all regions
-  mutate(year = 2018)
+            non_production_overheads = sum(non_production_overheads))  #summing up overhead costs across all regions
 overheads_by_region
 
-transactions_by_region <- transactions %>% group_by(year, region) %>% 
+transactions_by_region <- transactions %>% 
+  filter(year == 2018) %>% 
+  group_by(region) %>% 
   summarise(sales_revenue = sum(sales_revenue), 
-            gross_profit = sum(gross_profit)) %>% 
-  filter(year == 2018)
+            costs = sum(costs))
 transactions_by_region
 
-joined_by_region<-full_join(overheads_by_region, transactions_by_region, by = c("region", "year"))
-joined_by_region
+joined_by_region<-full_join(overheads_by_region, transactions_by_region, by = "region")
+joined_by_region <- joined_by_region %>% 
+  mutate(gross_profits = sales_revenue-costs-production_overheads) %>% 
+  mutate(operating_profits = sales_revenue-costs-production_overheads-non_production_overheads)
+head(joined_by_region)
+```
+
+### Figure 1- Operating Profits by Region
+
+```{r}
+
+joined_by_region %>% ggplot(aes(x = fct_rev(fct_reorder(region, operating_profits)), y = operating_profits)) +
+  geom_col() +
+  labs(x = "Region", y = "Operating Profits")
+  theme_minimal()
+
+```
+
+### Figure 2- Gross Profits by Region
+
+```{r}
+joined_by_region %>% ggplot(aes(x = fct_rev(fct_reorder(region, gross_profits)), y = gross_profits)) +
+  geom_col() +
+  labs(x = "Region", y = "Gross Profits")
+  theme_minimal()
+
+```
+
+```{r}
+
+# joined_by_region %>% pivot_longer(c(2,3,5), names_to = "components", values_to = "value") %>%  ggplot(aes(x = fct_rev(fct_reorder(region, operating_profits)), y = operating_profits)) +
+#   geom_col() +
+#   labs(x = "Region", y = "Operating Profits")
+#   theme_minimal()
+# df<-joined_by_region %>% filter(region == "South")
+# 
+# 
+# levels <- df$Category
+# data1 <- df  %>%
+#     mutate(Category = factor(Category, levels = levels),
+#         ymin = round(cumsum(Value), 3),
+#         ymax = lag(cumsum(Value), default = 0),
+#         xmin = c(head(Category, -1), NA),
+#         xmax = c(tail(Category, -1), NA),
+#         Impact = ifelse(Category %in% c(as.character(df$Category[1]), as.character(df$Category[nrow(df)])),"Budget",
+#                         ifelse(Value > 0, "Increase", "Decrease")
+#            ))
+
+# library(plotly)
+# 
+# x= list("Sales Revenue", "Variable Costs", "Production Overheads", "Gross Profits", "Non-Production Overheads", "Operating Profits")
+# measure= c("relative", "relative", "relative", "total", "relative", "total")
+# text= c("+60", "+80", "", "-40", "-20", "Total")
+# y= c(60, 80, 0, -40, -20, 0)
+# data = data.frame(x=factor(x,levels=x),measure,text,y)
+# 
+# fig <- plot_ly(
+#   data, name = "20", type = "waterfall", measure = ~measure,
+#   x = ~x, textposition = "outside", y= ~y, text =~text,
+#   connector = list(line = list(color= "rgb(63, 63, 63)")))
+# fig <- fig %>%
+#   layout(title = "Profit and loss statement 2018",
+#         xaxis = list(title = ""),
+#         yaxis = list(title = ""),
+#         autosize = TRUE,
+#         showlegend = TRUE)
+# 
+# fig
+
+```
+
+### Figure 3- Cost Breakdown by Region
+
+```{r}
+
+joined_by_region %>% pivot_longer(c(2,3,5), names_to = "components", values_to = "value") %>% 
+ggplot(aes(x = fct_rev(fct_reorder(region, sales_revenue)), y = value, fill = components)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Region", y = "Components")
+  theme_minimal()
+
+```
+
+### Figure 4- Cost Breakdown in Percentage by Region
+
+```{r}
+joined_by_region %>% pivot_longer(c(2,3,5), names_to = "components", values_to = "value") %>% 
+ggplot(aes(x = fct_rev(fct_reorder(region, sales_revenue)), y = value, fill = components)) +
+  geom_bar(stat = "identity", position = "fill") +
+  labs(x = "Region", y = "Components") +
+  theme_minimal()
+
+
 ```
