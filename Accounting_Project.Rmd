@@ -77,12 +77,10 @@ By breaking down the costs, we can see that the non-production overhead costs ar
 ```{r}
 
 # calculate overhead costs in 2018
-overheads_by_region <-overheads %>%  pivot_longer(2:9,names_to = "region", values_to = "overheads") %>% 
+overheads_by_region <- overheads %>% 
+  pivot_longer(2:9,names_to = "region", values_to = "overheads") %>% 
   pivot_wider(names_from = "category", values_from = "overheads") %>% #separate production and non-production costs in different columns
-  clean_names() %>% 
-  group_by(region) %>% 
-  summarise(production_overheads = sum(production_overheads), 
-            non_production_overheads = sum(non_production_overheads))  #summing up overhead costs across all regions
+  clean_names()
 overheads_by_region
 
 transactions_by_region <- transactions %>% 
@@ -92,7 +90,7 @@ transactions_by_region <- transactions %>%
             costs = sum(costs))
 transactions_by_region
 
-joined_by_region<-full_join(overheads_by_region, transactions_by_region, by = "region")
+joined_by_region <- full_join(overheads_by_region, transactions_by_region, by = "region")
 joined_by_region <- joined_by_region %>% 
   mutate(gross_profits = sales_revenue-costs-production_overheads) %>% 
   mutate(operating_profits = sales_revenue-costs-production_overheads-non_production_overheads)
@@ -207,19 +205,18 @@ As shown in figure 1 and 2, both sales revenue and contribution margin are highe
 From figure 4, we see that Belcastel contributed the most sales revenue to the Jefferey Alexander brand, while Madison contributed the most to the Elements brand.
 
 ```{r}
-joined_by_region <- joined_by_region %>% mutate(overhead_weight = production_overheads/sales_revenue)
-
-joined_by_region %>% summarise(sum(production_overheads))
+joined_by_region <- joined_by_region %>% 
+  mutate(pro_overhead_per_sales = production_overheads/sales_revenue)
 
 transactions_by_brand <- transactions %>% 
-  left_join(joined_by_region[c(1,8)], by = "region") %>% 
-  mutate(production_overheads = overhead_weight*sales_revenue) %>% 
+  left_join(joined_by_region %>% select(region, pro_overhead_per_sales), by = "region") %>% 
+  mutate(production_overheads = pro_overhead_per_sales*sales_revenue,
+         total_variable_cost = production_overheads+costs) %>% 
   group_by(brand) %>%
-  summarize(costs = sum(costs), sales_revenue = sum(sales_revenue), production_overheads = sum(production_overheads)) %>% 
-  mutate(contribution_margin = 1- (costs+production_overheads)/sales_revenue)
-
-transactions_by_brand %>% 
-  summarise(sum(production_overheads))
+  summarize(sales_revenue = sum(sales_revenue), 
+            total_variable_cost = sum(total_variable_cost)) %>% 
+  mutate(contribution_margin = 1- (total_variable_cost/sales_revenue))
+transactions_by_brand
 
 
 # # contribution margin
