@@ -234,3 +234,9 @@ transactions_by_brand_collection %>% filter(contribution_margin > 0) %>% ggplot(
   facet_wrap(~brand)
 
 ```
+
+### Figure 4
+
+![](images/sales_brand_coll-01.png)
+
+![](images/cm_brand_coll-01.png)
