@@ -169,7 +169,7 @@ ggplot(aes(x = fct_rev(fct_reorder(region, sales_revenue)), y = value, fill = co
 
 ## Question 3
 
-As shown in figure 1, the contribution margin is higher for Jefferey Alexander brand.
+As shown in figure 1 and 2, both sales revenue and contribution margin are higher for Jefferey Alexander brand. The difference in sales revenue is very large, which means that Jefferey Alexander is much more competitive in market than Elements. From figure 3, we see that for different collections, there is only a little variation in contribution margin (less than 10%) although the general trend shows the ones that generate higher revenues would give higher contribution margin for sales revenue under 10 million dollars.
 
 ```{r}
 # contribution margin
@@ -201,6 +201,8 @@ transactions_by_brand %>% ggplot(aes(x = contribution_margin, y = brand)) +
   geom_text(aes(label = round(contribution_margin, 2)))
 ```
 
+### Figure 2
+
 ```{r}
 
 transactions_by_brand %>% ggplot(aes(x = sales_revenue, y = brand)) + 
@@ -210,20 +212,17 @@ transactions_by_brand %>% ggplot(aes(x = sales_revenue, y = brand)) +
 ```
 
 ```{r}
-
-p <- head(transactions_by_collection) %>% ggplot(aes(x = contribution_margin, y = fct_reorder(collection, contribution_margin))) + 
-  geom_col() +
-  geom_text(aes(label = round(contribution_margin, 2)))
-
-# Turn it interactive with ggplotly
-p <- ggplotly(p)
-p
+# head(transactions_by_collection) %>% ggplot(aes(x = contribution_margin, y = fct_reorder(collection, contribution_margin))) + 
+#   geom_col() +
+#   geom_text(aes(label = round(contribution_margin, 2)))
 ```
+
+### Figure 3
 
 ```{r}
 
-transactions_by_collection %>% ggplot(aes(x = sales_revenue, y = contribution_margin)) +
-  geom_point()
+# transactions_by_collection %>% ggplot(aes(x = sales_revenue, y = contribution_margin)) +
+#   geom_point()
 
 transactions_by_collection %>% filter(contribution_margin > 0) %>% ggplot(aes(x = sales_revenue, y = contribution_margin)) +
   geom_point() +
