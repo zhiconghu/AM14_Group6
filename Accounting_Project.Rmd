@@ -207,25 +207,40 @@ As shown in figure 1 and 2, both sales revenue and contribution margin are highe
 From figure 4, we see that Belcastel contributed the most sales revenue to the Jefferey Alexander brand, while Madison contributed the most to the Elements brand.
 
 ```{r}
-# contribution margin
+joined_by_region <- joined_by_region %>% mutate(overhead_weight = production_overheads/sales_revenue)
+
+joined_by_region %>% summarise(sum(production_overheads))
+
 transactions_by_brand <- transactions %>% 
+  left_join(joined_by_region[c(1,8)], by = "region") %>% 
+  mutate(production_overheads = overhead_weight*sales_revenue) %>% 
   group_by(brand) %>%
-  summarize(costs = sum(costs), sales_revenue = sum(sales_revenue)) %>% 
-  mutate(contribution_margin = 1-costs/sales_revenue)
-transactions_by_brand
+  summarize(costs = sum(costs), sales_revenue = sum(sales_revenue), production_overheads = sum(production_overheads)) %>% 
+  mutate(contribution_margin = 1- (costs+production_overheads)/sales_revenue)
 
-transactions_by_collection <- transactions %>% 
-  group_by(collection) %>%
-  summarize(costs = sum(costs), sales_revenue = sum(sales_revenue)) %>% 
-  mutate(contribution_margin = 1-costs/sales_revenue) %>% 
-  arrange(desc(contribution_margin))
-head(transactions_by_collection)
+transactions_by_brand %>% 
+  summarise(sum(production_overheads))
 
-transactions_by_brand_collection <- transactions %>% 
-  group_by(brand, collection) %>%
-  summarize(costs = sum(costs), sales_revenue = sum(sales_revenue)) %>% 
-  mutate(contribution_margin = 1-costs/sales_revenue) %>% 
-  arrange(desc(contribution_margin))
+
+# # contribution margin
+# transactions_by_brand <- transactions %>% 
+#   group_by(brand) %>%
+#   summarize(costs = sum(costs), sales_revenue = sum(sales_revenue)) %>% 
+#   mutate(contribution_margin = 1-costs/sales_revenue)
+# transactions_by_brand
+# 
+# transactions_by_collection <- transactions %>% 
+#   group_by(collection) %>%
+#   summarize(costs = sum(costs), sales_revenue = sum(sales_revenue)) %>% 
+#   mutate(contribution_margin = 1-costs/sales_revenue) %>% 
+#   arrange(desc(contribution_margin))
+# head(transactions_by_collection)
+# 
+# transactions_by_brand_collection <- transactions %>% 
+#   group_by(brand, collection) %>%
+#   summarize(costs = sum(costs), sales_revenue = sum(sales_revenue)) %>% 
+#   mutate(contribution_margin = 1-costs/sales_revenue) %>% 
+#   arrange(desc(contribution_margin))
 ```
 
 ### Figure 1
