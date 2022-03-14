@@ -218,6 +218,25 @@ transactions_by_brand <- transactions %>%
   mutate(contribution_margin = 1- (total_variable_cost/sales_revenue))
 transactions_by_brand
 
+transactions_by_collection <- transactions %>% 
+  left_join(joined_by_region %>% select(region, pro_overhead_per_sales), by = "region") %>% 
+  mutate(production_overheads = pro_overhead_per_sales*sales_revenue,
+         total_variable_cost = production_overheads+costs) %>% 
+  group_by(collection) %>%
+  summarize(sales_revenue = sum(sales_revenue), 
+            total_variable_cost = sum(total_variable_cost)) %>% 
+  mutate(contribution_margin = 1- (total_variable_cost/sales_revenue))
+head(transactions_by_collection)
+
+transactions_by_brand_collection <- transactions %>% 
+  left_join(joined_by_region %>% select(region, pro_overhead_per_sales), by = "region") %>% 
+  mutate(production_overheads = pro_overhead_per_sales*sales_revenue,
+         total_variable_cost = production_overheads+costs) %>% 
+  group_by(brand,collection) %>%
+  summarize(sales_revenue = sum(sales_revenue), 
+            total_variable_cost = sum(total_variable_cost)) %>% 
+  mutate(contribution_margin = 1- (total_variable_cost/sales_revenue))
+head(transactions_by_brand_collection)
 
 # # contribution margin
 # transactions_by_brand <- transactions %>% 
@@ -243,18 +262,24 @@ transactions_by_brand
 ### Figure 1
 
 ```{r}
-transactions_by_brand %>% ggplot(aes(x = contribution_margin, y = brand)) + 
+transactions_by_brand %>% ggplot(aes(x = contribution_margin, y = brand, fill = brand)) + 
   geom_col() +
-  geom_text(aes(label = round(contribution_margin, 2)))
+  geom_text(aes(label = round(contribution_margin, 2)),  hjust = 1.5, color = '#ffffff') +
+  scale_fill_manual(values = c("darkred", "darkblue"))+
+  labs(x = "Contribution Margin", y = "Brand") +
+  theme_minimal()
 ```
 
 ### Figure 2
 
 ```{r}
 
-transactions_by_brand %>% ggplot(aes(x = sales_revenue, y = brand)) + 
+transactions_by_brand %>% ggplot(aes(x = sales_revenue, y = brand, fill = brand)) + 
   geom_col() +
-  geom_text(aes(label = round(sales_revenue)))
+  geom_text(aes(label = round(sales_revenue/1000000)), hjust = 1.5, color = '#ffffff') +
+  scale_fill_manual(values = c("darkred", "darkblue"))+
+  labs(x = "Sales Revenue (Million $)", y = "Brand") +
+  theme_minimal()
 
 ```
 
@@ -266,28 +291,33 @@ transactions_by_brand %>% ggplot(aes(x = sales_revenue, y = brand)) +
 
 ### Figure 3
 
-![](images/scatter-03.png)
+![](images/scatter2.png)
 
-![](images/outliers.png)
+![](images/outlier2.png)
 
 ```{r}
 
 # transactions_by_collection %>% ggplot(aes(x = sales_revenue, y = contribution_margin)) +
 #   geom_point()
 
-transactions_by_collection %>% filter(contribution_margin > 0) %>% ggplot(aes(x = sales_revenue, y = contribution_margin)) +
+transactions_by_brand_collection %>% filter(contribution_margin > 0) %>% ggplot(aes(x = sales_revenue, y = contribution_margin)) +
   geom_point() +
-  geom_smooth()
+  geom_smooth(se = FALSE)+
+  scale_fill_manual(values = c("darkred", "darkblue"))+
+  labs(x = "Sales Revenue ($)", y = "Contribution Margin") +
+  theme_minimal()
 
 transactions_by_brand_collection %>% filter(contribution_margin > 0) %>% ggplot(aes(x = sales_revenue, y = contribution_margin)) +
   geom_point() +
-  geom_smooth() +
-  facet_wrap(~brand)
+  geom_smooth(se = FALSE) +
+  facet_wrap(~brand)+
+  labs(x = "Sales Revenue ($)", y = "Contribution Margin") +
+  theme_minimal()
 
 ```
 
 ### Figure 4
 
-![](images/sales_brand_coll-01.png)
+![](images/sales_area.png)
 
-![](images/cm_brand_coll-01.png)
+![](images/cm_area.png)
