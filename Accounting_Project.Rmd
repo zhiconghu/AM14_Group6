@@ -166,3 +166,72 @@ ggplot(aes(x = fct_rev(fct_reorder(region, sales_revenue)), y = value, fill = co
 
 
 ```
+
+## Question 3
+
+As shown in figure 1, the contribution margin is higher for Jefferey Alexander brand.
+
+```{r}
+# contribution margin
+transactions_by_brand <- transactions %>% 
+  group_by(brand) %>%
+  summarize(costs = sum(costs), sales_revenue = sum(sales_revenue)) %>% 
+  mutate(contribution_margin = 1-costs/sales_revenue)
+transactions_by_brand
+
+transactions_by_collection <- transactions %>% 
+  group_by(collection) %>%
+  summarize(costs = sum(costs), sales_revenue = sum(sales_revenue)) %>% 
+  mutate(contribution_margin = 1-costs/sales_revenue) %>% 
+  arrange(desc(contribution_margin))
+head(transactions_by_collection)
+
+transactions_by_brand_collection <- transactions %>% 
+  group_by(brand, collection) %>%
+  summarize(costs = sum(costs), sales_revenue = sum(sales_revenue)) %>% 
+  mutate(contribution_margin = 1-costs/sales_revenue) %>% 
+  arrange(desc(contribution_margin))
+```
+
+### Figure 1
+
+```{r}
+transactions_by_brand %>% ggplot(aes(x = contribution_margin, y = brand)) + 
+  geom_col() +
+  geom_text(aes(label = round(contribution_margin, 2)))
+```
+
+```{r}
+
+transactions_by_brand %>% ggplot(aes(x = sales_revenue, y = brand)) + 
+  geom_col() +
+  geom_text(aes(label = round(sales_revenue)))
+
+```
+
+```{r}
+
+p <- head(transactions_by_collection) %>% ggplot(aes(x = contribution_margin, y = fct_reorder(collection, contribution_margin))) + 
+  geom_col() +
+  geom_text(aes(label = round(contribution_margin, 2)))
+
+# Turn it interactive with ggplotly
+p <- ggplotly(p)
+p
+```
+
+```{r}
+
+transactions_by_collection %>% ggplot(aes(x = sales_revenue, y = contribution_margin)) +
+  geom_point()
+
+transactions_by_collection %>% filter(contribution_margin > 0) %>% ggplot(aes(x = sales_revenue, y = contribution_margin)) +
+  geom_point() +
+  geom_smooth() 
+
+transactions_by_brand_collection %>% filter(contribution_margin > 0) %>% ggplot(aes(x = sales_revenue, y = contribution_margin)) +
+  geom_point() +
+  geom_smooth() +
+  facet_wrap(~brand)
+
+```
