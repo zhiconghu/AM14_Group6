@@ -10,31 +10,14 @@ library(tidyverse)
 library(here)
 library(janitor)
 library(lubridate)
-library(patchwork)
-
 ```
 
-# Load data
+## Question 1
 
 ```{r}
 # import data
 overheads <- readxl::read_excel(here("Data","Overheads.xlsx"))
 transactions <- read.delim(here("Data","Transactions.txt"))
-```
-
-
-# Data Cleaning
-
-```{r}
-unique(transactions$region)
-```
-
-```{r}
-transactions[transactions$region == "Centrall", "region"] <-"Central"
-transactions[transactions$region == "Soouth", "region"] <-"South"
-```
-
-```{r}
 # clean data
 transactions$quantity_sold<- as.numeric(transactions$quantity_sold)
 transactions$date_of_sale<-lubridate::as_date(transactions$date_of_sale, format = '%d/%m/%Y') 
@@ -43,11 +26,7 @@ transactions <- transactions %>%
 head(transactions)
 
 overheads<-rename(overheads, category = `For the year 2018`)
-```
 
-## Question 1
-
-```{r}
 # calculate overhead costs in 2018
 overheads %>%  pivot_longer(2:9,names_to = "region", values_to = "overheads") %>% 
   pivot_wider(names_from = "category", values_from = "overheads") %>% #separate production and non-production costs in different columns
@@ -104,33 +83,20 @@ head(joined_by_region)
 
 ```{r}
 
-(joined_by_region %>% 
-  ggplot(aes(x = fct_reorder(region, -operating_profits), y = operating_profits)) +
-  geom_col(fill = "darkred") +
-  labs(x = "", y = "Absolute Operating Profits") +
-  theme_minimal()) / (joined_by_region %>% 
-  ggplot(aes(x = fct_reorder(region, -operating_profits), y = operating_profits/sales_revenue)) +
-  geom_col(fill = "darkblue") +
-  scale_y_continuous(labels = scales::percent) +
-  labs(x = "", y = "% Operating Profits") +
-  theme_minimal())
+joined_by_region %>% ggplot(aes(x = fct_rev(fct_reorder(region, operating_profits)), y = operating_profits)) +
+  geom_col() +
+  labs(x = "Region", y = "Operating Profits")
+  theme_minimal()
 
 ```
 
 ### Figure 2- Gross Profits by Region
 
 ```{r}
-
-(joined_by_region %>% 
-  ggplot(aes(x = fct_reorder(region, -gross_profits), y = gross_profits)) +
-  geom_col(fill = "darkred") +
-  labs(x = "", y = "Absolute Gross Profits") +
-  theme_minimal()) / (joined_by_region %>% 
-  ggplot(aes(x = fct_reorder(region, -gross_profits), y = gross_profits/sales_revenue)) +
-  geom_col(fill = "darkblue") +
-  scale_y_continuous(labels = scales::percent) +
-  labs(x = "", y = "% Gross Profits") +
-  theme_minimal())
+joined_by_region %>% ggplot(aes(x = fct_rev(fct_reorder(region, gross_profits)), y = gross_profits)) +
+  geom_col() +
+  labs(x = "Region", y = "Gross Profits")
+  theme_minimal()
 
 ```
 
@@ -255,6 +221,10 @@ transactions_by_brand %>% ggplot(aes(x = sales_revenue, y = brand)) +
 
 ### Figure 3
 
+![](images/scatter-03.png)
+
+![](images/outliers.png)
+
 ```{r}
 
 # transactions_by_collection %>% ggplot(aes(x = sales_revenue, y = contribution_margin)) +
@@ -262,7 +232,7 @@ transactions_by_brand %>% ggplot(aes(x = sales_revenue, y = brand)) +
 
 transactions_by_collection %>% filter(contribution_margin > 0) %>% ggplot(aes(x = sales_revenue, y = contribution_margin)) +
   geom_point() +
-  geom_smooth() 
+  geom_smooth()
 
 transactions_by_brand_collection %>% filter(contribution_margin > 0) %>% ggplot(aes(x = sales_revenue, y = contribution_margin)) +
   geom_point() +
