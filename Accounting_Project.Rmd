@@ -181,8 +181,9 @@ head(joined_by_region)
 joined_by_region %>% pivot_longer(c(2,3,5), names_to = "components", values_to = "value") %>% 
 ggplot(aes(x = fct_rev(fct_reorder(region, sales_revenue)), y = value, fill = components)) +
   geom_bar(stat = "identity") +
-  labs(x = "Region", y = "Components")
-  theme_minimal()
+  labs(x = "Region", y = "Components")+
+  theme_minimal() +
+  scale_fill_brewer(palette = "Blues")
 
 ```
 
@@ -193,7 +194,8 @@ joined_by_region %>% pivot_longer(c(2,3,5), names_to = "components", values_to =
 ggplot(aes(x = fct_rev(fct_reorder(region, sales_revenue)), y = value, fill = components)) +
   geom_bar(stat = "identity", position = "fill") +
   labs(x = "Region", y = "Components") +
-  theme_minimal()
+  theme_minimal() +
+  scale_fill_brewer(palette = "Blues")
 
 
 ```
@@ -215,7 +217,8 @@ transactions_by_brand <- transactions %>%
   group_by(brand) %>%
   summarize(sales_revenue = sum(sales_revenue), 
             total_variable_cost = sum(total_variable_cost)) %>% 
-  mutate(contribution_margin = 1- (total_variable_cost/sales_revenue))
+  mutate(contribution_margin_perc = 1- (total_variable_cost/sales_revenue),
+         contribution_margin = sales_revenue-total_variable_cost)
 transactions_by_brand
 
 transactions_by_collection <- transactions %>% 
@@ -225,7 +228,8 @@ transactions_by_collection <- transactions %>%
   group_by(collection) %>%
   summarize(sales_revenue = sum(sales_revenue), 
             total_variable_cost = sum(total_variable_cost)) %>% 
-  mutate(contribution_margin = 1- (total_variable_cost/sales_revenue))
+  mutate(contribution_margin_perc = 1- (total_variable_cost/sales_revenue),
+         contribution_margin = sales_revenue-total_variable_cost)
 head(transactions_by_collection)
 
 transactions_by_brand_collection <- transactions %>% 
@@ -235,38 +239,19 @@ transactions_by_brand_collection <- transactions %>%
   group_by(brand,collection) %>%
   summarize(sales_revenue = sum(sales_revenue), 
             total_variable_cost = sum(total_variable_cost)) %>% 
-  mutate(contribution_margin = 1- (total_variable_cost/sales_revenue))
+  mutate(contribution_margin_perc = 1- (total_variable_cost/sales_revenue),
+         contribution_margin = sales_revenue-total_variable_cost)
 head(transactions_by_brand_collection)
-
-# # contribution margin
-# transactions_by_brand <- transactions %>% 
-#   group_by(brand) %>%
-#   summarize(costs = sum(costs), sales_revenue = sum(sales_revenue)) %>% 
-#   mutate(contribution_margin = 1-costs/sales_revenue)
-# transactions_by_brand
-# 
-# transactions_by_collection <- transactions %>% 
-#   group_by(collection) %>%
-#   summarize(costs = sum(costs), sales_revenue = sum(sales_revenue)) %>% 
-#   mutate(contribution_margin = 1-costs/sales_revenue) %>% 
-#   arrange(desc(contribution_margin))
-# head(transactions_by_collection)
-# 
-# transactions_by_brand_collection <- transactions %>% 
-#   group_by(brand, collection) %>%
-#   summarize(costs = sum(costs), sales_revenue = sum(sales_revenue)) %>% 
-#   mutate(contribution_margin = 1-costs/sales_revenue) %>% 
-#   arrange(desc(contribution_margin))
 ```
 
 ### Figure 1
 
 ```{r}
-transactions_by_brand %>% ggplot(aes(x = contribution_margin, y = brand, fill = brand)) + 
+transactions_by_brand %>% ggplot(aes(x = contribution_margin/1000000, y = brand, fill = brand)) + 
   geom_col() +
-  geom_text(aes(label = round(contribution_margin, 2)),  hjust = 1.5, color = '#ffffff') +
+  geom_text(aes(label = round(contribution_margin/1000000)),  hjust = 1.5, color = '#ffffff') +
   scale_fill_manual(values = c("darkred", "darkblue"))+
-  labs(x = "Contribution Margin", y = "Brand") +
+  labs(x = "Contribution Margin (Millions $)", y = "Brand") +
   theme_minimal()
 ```
 
@@ -274,7 +259,7 @@ transactions_by_brand %>% ggplot(aes(x = contribution_margin, y = brand, fill = 
 
 ```{r}
 
-transactions_by_brand %>% ggplot(aes(x = sales_revenue, y = brand, fill = brand)) + 
+transactions_by_brand %>% ggplot(aes(x = sales_revenue/1000000, y = brand, fill = brand)) + 
   geom_col() +
   geom_text(aes(label = round(sales_revenue/1000000)), hjust = 1.5, color = '#ffffff') +
   scale_fill_manual(values = c("darkred", "darkblue"))+
