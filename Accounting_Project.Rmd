@@ -1,11 +1,13 @@
 ---
-title: "Accounting_Project"
-author: "Sarah Wu"
+title: "Accounting Project"
+author: "Study Group 6"
 date: "10/03/2022"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 library(tidyverse)
 library(here)
 library(janitor)
@@ -16,7 +18,7 @@ library(patchwork)
 
 # Load data
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 # import data
 overheads <- readxl::read_excel(here("Data","Overheads.xlsx"))
 transactions <- read.delim(here("Data","Transactions.txt"))
@@ -225,19 +227,13 @@ transactions_by_brand %>% ggplot(aes(x = sales_revenue/1000000, y = brand, fill 
 
 ```
 
-```{r}
-# head(transactions_by_collection) %>% ggplot(aes(x = contribution_margin, y = fct_reorder(collection, contribution_margin))) + 
-#   geom_col() +
-#   geom_text(aes(label = round(contribution_margin, 2)))
-```
-
 ## Figure 3
 
 ![](images/scatter3.png)
 
-![](images/scatter2.png)
+![](images/scatter.png)
 
-![](images/outlier2.png)
+![](images/outlier.png)
 
 ```{r}
 
