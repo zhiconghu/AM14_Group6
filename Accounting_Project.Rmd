@@ -159,9 +159,9 @@ ggplot(aes(x = fct_rev(fct_reorder(region, sales_revenue)), y = value, fill = co
 
 # Question 3
 
-As shown in figure 1 and 2, both sales revenue and contribution margin are higher for Jefferey Alexander brand. The difference in sales revenue is very large, which means that Jefferey Alexander is much more competitive in market than Elements. From figure 3, we see that for different collections, there is only a little variation in contribution margin (less than 10%) although the general trend shows the ones that generate higher revenues would give higher contribution margin for sales revenue under 10 million dollars.
+As shown in figure 1 and 2, both sales revenue and contribution margin are higher for Jefferey Alexander brand. The difference in sales revenue is very large, which means that Jefferey Alexander is much more competitive in market than Elements. From figure 3, we see that for different collections, there is a positive relationship between sales revenue and contribution margin, which holds true for both brands. 
 
-From figure 4, we see that Belcastel contributed the most sales revenue to the Jefferey Alexander brand, while Madison contributed the most to the Elements brand.
+From figure 4, we see that Belcastel contributed the most sales revenue and contribution margin to the Jefferey Alexander brand, while Madison contributed the most to the Elements brand.
 
 ```{r}
 joined_by_region <- joined_by_region %>% 
@@ -232,6 +232,8 @@ transactions_by_brand %>% ggplot(aes(x = sales_revenue/1000000, y = brand, fill 
 ```
 
 ## Figure 3
+
+![](images/scatter3.png)
 
 ![](images/scatter2.png)
 
