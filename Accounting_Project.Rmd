@@ -3,8 +3,8 @@ title: "Accounting Project"
 author: "Study Group 6"
 date: "10/03/2022"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 ```{r message=FALSE, warning=FALSE}
@@ -161,7 +161,7 @@ ggplot(aes(x = fct_rev(fct_reorder(region, sales_revenue)), y = value, fill = co
 
 # Question 3
 
-As shown in figure 1 and 2, both sales revenue and contribution margin are higher for Jefferey Alexander brand. The difference in sales revenue is very large, which means that Jefferey Alexander is much more competitive in market than Elements. From figure 3, we see that for different collections, there is a positive relationship between sales revenue and contribution margin, which holds true for both brands. 
+As shown in figure 1 and 2, both sales revenue and contribution margin are higher for Jefferey Alexander brand. The difference in sales revenue is very large, which means that Jefferey Alexander is much more competitive in market than Elements. From figure 3, we see that for different collections, there is a positive relationship between sales revenue and contribution margin, which holds true for both brands.
 
 From figure 4, we see that Belcastel contributed the most sales revenue and contribution margin to the Jefferey Alexander brand, while Madison contributed the most to the Elements brand.
 
@@ -262,10 +262,9 @@ transactions_by_brand_collection %>% filter(contribution_margin > 0) %>% ggplot(
 
 ![](images/cm_area.png)
 
-
 # Question 4
 
-We choose to find the breakeven sales and volume by chronological order of transactions. 
+We choose to find the breakeven sales and volume by chronological order of transactions.
 
 ## Overall
 
@@ -290,6 +289,20 @@ Overall, the company manage to breakeven at 2018-10-21 with a breakeven sales re
 ggplot(break_even, aes(x = volume)) +
   geom_line(aes(y = total_cost, color = "Cost")) +
   geom_line(aes(y = sales_revenue, color = "Revenue")) +
+  annotate("text", 
+           x = break_even[which(break_even$total_cost <= break_even$sales_revenue)[1],][3] %>% pull() - 2000000,
+           y = break_even[which(break_even$total_cost <= break_even$sales_revenue)[1],][2] %>% pull(),
+           label = "Break-Even Point",
+           size = 4,
+           color = "darkgreen") +
+  annotate("segment", 
+           x = break_even[which(break_even$total_cost <= break_even$sales_revenue)[1],][3] %>% pull() - 800000,
+           xend = break_even[which(break_even$total_cost <= break_even$sales_revenue)[1],][3] %>% pull() - 100000,
+           y = break_even[which(break_even$total_cost <= break_even$sales_revenue)[1],][2] %>% pull(),
+           yend = break_even[which(break_even$total_cost <= break_even$sales_revenue)[1],][2] %>% pull(),
+           arrow = arrow(),
+           size = 0.5,
+           color = "darkgreen") +
   scale_colour_manual("", 
                       breaks = c("Cost", "Revenue"),
                       values = c("darkred", "darkblue")) +
@@ -298,6 +311,7 @@ ggplot(break_even, aes(x = volume)) +
        x = "Sales Volume",
        y = "Revenue/Cost")
 ```
+
 
 ## Regional
 
@@ -410,7 +424,6 @@ break_even_Northeast %>%
          y = "Revenue/Cost")
 ```
 
-
 # Question 5
 
 ## a)
@@ -435,6 +448,6 @@ transactions_by_brand_collection
 
 ## b)
 
-Our full cost estimations could be improved if we can know about when the products of each transactions are produced and hence allocate the fixed cost according to their production date instead of date of sales. 
+Our full cost estimations could be improved if we can know about when the products of each transactions are produced and hence allocate the fixed cost according to their production date instead of date of sales.
 
 If detailed information about each products are hard to gather, mean inventory holding period of each product or turnover rate could also be used to make a rough estimate of when each product is produced.
